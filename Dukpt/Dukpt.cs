@@ -1,100 +1,104 @@
 ﻿using System.IO;
+using System.Text;
+using System.Linq;
+using System.Numerics;
 using System.Security.Cryptography;
 
 namespace DukptSharp
 {
     public class Dukpt
     {
-        static BigInt REG3_MASK = new BigInt("1FFFFF");
-        static BigInt SHIFT_REG_MASK = new BigInt("100000");
-        static BigInt REG8_MASK = new BigInt("FFFFFFFFFFE00000");
-        static BigInt LS16_MASK = new BigInt("FFFFFFFFFFFFFFFF");
-        static BigInt MS16_MASK = new BigInt("FFFFFFFFFFFFFFFF0000000000000000");
-        static BigInt KEY_MASK = new BigInt("C0C0C0C000000000C0C0C0C000000000");
-        static BigInt PEK_MASK = new BigInt("FF00000000000000FF");
-        static BigInt KSN_MASK = new BigInt("FFFFFFFFFFFFFFE00000");
+        private static readonly BigInteger Reg3Mask     = BigInt.FromHex("1FFFFF");
+        private static readonly BigInteger ShiftRegMask = BigInt.FromHex("100000");
+        private static readonly BigInteger Reg8Mask     = BigInt.FromHex("FFFFFFFFFFE00000");
+        private static readonly BigInteger Ls16Mask     = BigInt.FromHex("FFFFFFFFFFFFFFFF");
+        private static readonly BigInteger Ms16Mask     = BigInt.FromHex("FFFFFFFFFFFFFFFF0000000000000000");
+        private static readonly BigInteger KeyMask      = BigInt.FromHex("C0C0C0C000000000C0C0C0C000000000");
+        private static readonly BigInteger PekMask      = BigInt.FromHex("FF00000000000000FF");
+        private static readonly BigInteger KsnMask      = BigInt.FromHex("FFFFFFFFFFFFFFE00000");
 
-        public static BigInt CreateBdk(BigInt key1, BigInt key2)
+        public static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
         {
             return key1 ^ key2;
         }
 
-        public static BigInt CreateIpek(BigInt ksn, BigInt bdk)
+        public static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
         {
-            return Encrypt((ksn & KSN_MASK) >> 16, bdk) << 64 | Encrypt((ksn & KSN_MASK) >> 16, bdk ^ KEY_MASK);
+            return Encrypt("TripleDES", true, bdk, (ksn & KsnMask) >> 16) << 64 
+                 | Encrypt("TripleDES", true, bdk ^ KeyMask, (ksn & KsnMask) >> 16);
         }
 
-        public static BigInt CreatePek(BigInt ipek, BigInt ksn)
+        public static BigInteger CreatePek(BigInteger ipek, BigInteger ksn)
         {
-            return DeriveKey(ipek, ksn) ^ PEK_MASK;
+            return DeriveKey(ipek, ksn) ^ PekMask;
         }
 
-        public static BigInt DeriveKey(BigInt ipek, BigInt ksn)
+        public static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
         {
-            var ksnReg = ksn & LS16_MASK & REG8_MASK;
+            var ksnReg = ksn & Ls16Mask & Reg8Mask;
             var curKey = ipek;
-            for (var shiftReg = SHIFT_REG_MASK; shiftReg > 0; shiftReg >>= 1)
+            for (var shiftReg = ShiftRegMask; shiftReg > 0; shiftReg >>= 1)
             {
-                if ((shiftReg & ksn & REG3_MASK) > 0)
+                if ((shiftReg & ksn & Reg3Mask) > 0)
                 {
                     ksnReg |= shiftReg;
-                    curKey = Keygen(curKey, ksnReg);
+                    curKey = GenerateKey(curKey, ksnReg);
                 }
             }
             return curKey;
         }
 
-        public static BigInt Keygen(BigInt key, BigInt ksn)
+        public static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
         {
-            return EncryptRegister(key ^ KEY_MASK, ksn) << 64 | EncryptRegister(key, ksn);
+            return EncryptRegister(key ^ KeyMask, ksn) << 64 | EncryptRegister(key, ksn);
         }
 
-        public static BigInt EncryptRegister(BigInt curKey, BigInt reg8)
+        public static BigInteger EncryptRegister(BigInteger curKey, BigInteger reg8)
         {
-            return (curKey & LS16_MASK) ^ Encrypt("DES", true, (curKey & MS16_MASK) >> 64, (curKey & LS16_MASK ^ reg8));
+            return (curKey & Ls16Mask) ^ Encrypt("DES", true, (curKey & Ms16Mask) >> 64, (curKey & Ls16Mask ^ reg8));
         }
 
-        public static BigInt Encrypt(string name, bool encrypt, BigInt key, BigInt message)
+        public static BigInteger Encrypt(string name, bool encrypt, BigInteger key, BigInteger message)
         {
             using (var cipher = SymmetricAlgorithm.Create(name))
             {
-                System.Console.WriteLine("COOL " + key.Bytes.Length + " ~ " + message.Bytes.Length);
-                System.Console.WriteLine("DATA " + key + " ~ " + message);
-
-                cipher.Key = key.Bytes;
+                cipher.Key = key.GetBytes();
                 cipher.IV = new byte[8];
                 cipher.Mode = CipherMode.CBC;
                 cipher.Padding = PaddingMode.Zeros;
                 using (var crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
                 using (var ms = new MemoryStream())
                 {
-                    for (var i = 0; i < message.Bytes.Length / 8; i++)
+                    var data = message.GetBytes();
+                    BigInteger x = 0;
+                    for (var i = 0; i < data.Length / 8; i++)
                     {
-                        var bi = new BigInt(crypto.TransformFinalBlock(message.Segment(i * 8, 8).Bytes, 0, 8));
-                        bi = i == 0 ? bi : (bi ^ message.Segment((i - 1) * 8, 8));
-                        ms.Write(bi.Bytes, 0, bi.Bytes.Length);
+                        var bi = BigInt.FromBytes(message.GetBytes().Skip(i * 8).Take(8).ToArray());
+                        if (encrypt)
+                        {
+                            bi = BigInt.FromBytes(crypto.TransformFinalBlock((bi ^ x).GetBytes(), 0, 8));
+                            x = bi;
+                        }
+                        else
+                        {
+                            var y = bi;
+                            bi = BigInt.FromBytes(crypto.TransformFinalBlock(bi.GetBytes(), 0, 8)) ^ x;
+                            x = y;
+                        }
+                        var biData = bi.GetBytes();
+                        ms.Write(biData, 0, biData.Length);
                     }
-                    return new BigInt(ms.ToArray());
+                    return BigInt.FromBytes(ms.ToArray());
                 }
             }
         }
 
-        public static BigInt Encrypt(BigInt b, BigInt key)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] track, bool encrypt = true)
         {
-            using (var cipher = TripleDES.Create())
-            {
-                System.Console.WriteLine("COOL2 " + key.Bytes.Length + " ~ " + b.Bytes.Length);
-                System.Console.WriteLine("DATA2 " + key + " ~ " + b);
-
-                cipher.Key = key.Bytes;
-                cipher.IV = new byte[8];
-                cipher.Mode = CipherMode.CBC;
-                cipher.Padding = PaddingMode.Zeros;
-                using (var crypto = cipher.CreateEncryptor())
-                {
-                    return new BigInt(crypto.TransformFinalBlock(b.Bytes, 0, b.Bytes.Length));
-                }
-            }
+            var ipek = Dukpt.CreateIpek(BigInt.FromHex(ksn), BigInt.FromHex(bdk));
+            var pek = Dukpt.CreatePek(ipek, BigInt.FromHex(ksn));
+            var encrypted = Dukpt.Encrypt("TripleDES", encrypt, pek, BigInt.FromBytes(track));
+            return encrypted.GetBytes();
         }
     }
 }

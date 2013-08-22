@@ -3,8 +3,7 @@ C:\Users\ScottBatary\Desktop\Dukpt\Dukpt\bin\Debug\Dukpt.pdb
 C:\Users\ScottBatary\Desktop\Dukpt\Dukpt\obj\Debug\Dukpt.csprojResolveAssemblyReference.cache
 C:\Users\ScottBatary\Desktop\Dukpt\Dukpt\obj\Debug\Dukpt.dll
 C:\Users\ScottBatary\Desktop\Dukpt\Dukpt\obj\Debug\Dukpt.pdb
-C:\Users\ScottBatary\Desktop\New folder\Dukpt\bin\Debug\Dukpt.dll
-C:\Users\ScottBatary\Desktop\New folder\Dukpt\bin\Debug\Dukpt.pdb
-C:\Users\ScottBatary\Desktop\New folder\Dukpt\obj\Debug\Dukpt.csprojResolveAssemblyReference.cache
-C:\Users\ScottBatary\Desktop\New folder\Dukpt\obj\Debug\Dukpt.dll
-C:\Users\ScottBatary\Desktop\New folder\Dukpt\obj\Debug\Dukpt.pdb
+C:\Users\ScottBatary\Desktop\test2\Dukpt\bin\Debug\Dukpt.dll
+C:\Users\ScottBatary\Desktop\test2\Dukpt\bin\Debug\Dukpt.pdb
+C:\Users\ScottBatary\Desktop\test2\Dukpt\obj\Debug\Dukpt.dll
+C:\Users\ScottBatary\Desktop\test2\Dukpt\obj\Debug\Dukpt.pdb

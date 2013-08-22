@@ -6,11 +6,11 @@ C:\Users\ScottBatary\Desktop\dukpt\Test\bin\Debug\Dukpt.pdb
 C:\Users\ScottBatary\Desktop\dukpt\Test\obj\Debug\Test.csprojResolveAssemblyReference.cache
 C:\Users\ScottBatary\Desktop\dukpt\Test\obj\Debug\Test.exe
 C:\Users\ScottBatary\Desktop\dukpt\Test\obj\Debug\Test.pdb
-C:\Users\ScottBatary\Desktop\New folder\Test\bin\Debug\Test.exe.config
-C:\Users\ScottBatary\Desktop\New folder\Test\obj\Debug\Test.exe
-C:\Users\ScottBatary\Desktop\New folder\Test\obj\Debug\Test.pdb
-C:\Users\ScottBatary\Desktop\New folder\Test\bin\Debug\Test.exe
-C:\Users\ScottBatary\Desktop\New folder\Test\bin\Debug\Test.pdb
-C:\Users\ScottBatary\Desktop\New folder\Test\bin\Debug\Dukpt.dll
-C:\Users\ScottBatary\Desktop\New folder\Test\bin\Debug\Dukpt.pdb
-C:\Users\ScottBatary\Desktop\New folder\Test\obj\Debug\Test.csprojResolveAssemblyReference.cache
+C:\Users\ScottBatary\Desktop\test2\Test\bin\Debug\Test.exe.config
+C:\Users\ScottBatary\Desktop\test2\Test\bin\Debug\Test.exe
+C:\Users\ScottBatary\Desktop\test2\Test\bin\Debug\Test.pdb
+C:\Users\ScottBatary\Desktop\test2\Test\bin\Debug\Dukpt.dll
+C:\Users\ScottBatary\Desktop\test2\Test\bin\Debug\Dukpt.pdb
+C:\Users\ScottBatary\Desktop\test2\Test\obj\Debug\Test.csprojResolveAssemblyReference.cache
+C:\Users\ScottBatary\Desktop\test2\Test\obj\Debug\Test.exe
+C:\Users\ScottBatary\Desktop\test2\Test\obj\Debug\Test.pdb
