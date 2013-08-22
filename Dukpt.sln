@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dukpt", "Dukpt\Dukpt.csproj", "{AABCC2F8-1E73-4279-8414-15BCB9ECA7D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{F65D3E68-E845-4FE8-9983-5E3934C09981}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AABCC2F8-1E73-4279-8414-15BCB9ECA7D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AABCC2F8-1E73-4279-8414-15BCB9ECA7D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AABCC2F8-1E73-4279-8414-15BCB9ECA7D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AABCC2F8-1E73-4279-8414-15BCB9ECA7D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F65D3E68-E845-4FE8-9983-5E3934C09981}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F65D3E68-E845-4FE8-9983-5E3934C09981}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F65D3E68-E845-4FE8-9983-5E3934C09981}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F65D3E68-E845-4FE8-9983-5E3934C09981}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
