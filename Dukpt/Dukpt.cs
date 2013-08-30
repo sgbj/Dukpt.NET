@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace DukptSharp
 {
-    public class Dukpt
+    public static class Dukpt
     {
         private static readonly BigInteger Reg3Mask     = BigInt.FromHex("1FFFFF");
         private static readonly BigInteger ShiftRegMask = BigInt.FromHex("100000");
