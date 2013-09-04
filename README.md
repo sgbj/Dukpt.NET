@@ -8,7 +8,9 @@ About
 
 It's no secret that Annex A is hard to understand and the entire process isn't explained in a manner that's easy to follow or translate into code. One of the reasons it's difficult to understand is that it was written for devices that (at the time) were limited and only had access to so many registers and operations, and not necessarily for high-level software developers looking to use the process either for new software, backwards compatibility with existing technology, or logging/testing purposes.
 
-I wrote this implementation of DUKPT for fun as a side project for my work. We already had an existing implementation of DUKPT in the project I'm maintaining, which was no longer being used and hence could be stripped out. However, the old one was convoluted and had well over 500 lines of code with lots of dependencies. It still amazes me how [scarcely documented](http://security.stackexchange.com/questions/13309/what-is-the-dukpt-key-derivation-function) this process is, even though it seems like a fairly standard practice. Unfortunately, the advice people usually receive it to [purchase the spec](http://webstore.ansi.org/RecordDetail.aspx?sku=ANSI+X9.24-1%3A2009) for $140.
+I wrote this implementation of DUKPT for fun as a side project for my work. We already had an existing implementation of DUKPT in the project I'm maintaining, which was no longer being used and hence could be stripped out. However, the old one was convoluted and had well over 500 lines of code with lots of dependencies. This library only has about 100 lines of code and only focuses on DUKPT encryption and decryption. 
+
+It still amazes me how [scarcely documented](http://security.stackexchange.com/questions/13309/what-is-the-dukpt-key-derivation-function) this process is, even though it seems like a fairly standard practice. Unfortunately, the advice people usually receive it to [purchase the spec](http://webstore.ansi.org/RecordDetail.aspx?sku=ANSI+X9.24-1%3A2009) for $140.
 
 Key Management
 --------------
@@ -33,15 +35,41 @@ __Note:__ Key management is beyond the scope of this project and this explanatio
 One methodology I've seen that'll allow you to associate a particular KSN to a BDK is to take the current KSN you've been given, mask it to retrieve the Initial Key Serial Number (IKSN), and look up the BDK in a table that maps IKSNs to BDKs:
 
 Example:
-```Java
-ksn = 0xFFFF9876543210E00008
-iksn = ksn & 0xFFFFFFFFFFFFFFE00000 // 0xFFFF9876543210E00000
+```
+ksn = FFFF9876543210E00008
+iksn = ksn & FFFFFFFFFFFFFFE00000 // FFFF9876543210E00000
 ```
 You'd then have a table that looks like:
 
 | IKSN                   | BDK                                |
 |:----------------------:|:----------------------------------:|
-| 0xFFFF9876543210E00000 | 0x0123456789ABCDEFFEDCBA9876543210 |
+| 0xFFFF9876543210E00000 | 0123456789ABCDEFFEDCBA9876543210 |
 | ...                    | ...                                |
 
-From which you could easily grab the BDK `0x0123456789ABCDEFFEDCBA9876543210`.
+From which you could easily grab the BDK `0123456789ABCDEFFEDCBA9876543210`.
+
+Algorithm
+---------
+
+***
+__Note:__ Assume that all numeric values are hexadecimal numbers, or the representation of a sequence of bytes as a hexadecimal number.
+***
+
+The following are the BDK, KSN, and encrypted track message (cryptogram) we've been given:
+```
+bdk = 0123456789ABCDEFFEDCBA9876543210
+ksn = FFFF9876543210E00008
+cryptogram = C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12
+```
+
+Here's an example of the unencrypted track 1 data (cryptogram above), and below that is its value in hex; this is what we'll get after successfully decrypting the cryptogram:
+```
+%B5452300551227189^HOGAN/PAUL      ^08043210000000725000000?
+2542353435323330303535313232373138395E484F47414E2F5041554C2020202020205E30383034333231303030303030303732353030303030303F00000000
+```
+
+***
+__Note:__ As you're probably already aware, this algorithm is best described using big numbers, which can't be represented as literals in some programming languages (like Java or C#). However, many languages have classes that allow you to represent big numbers in other ways (e.g., java.math.BigInteger, System.Numerics.BigInteger). It's your job to adapt this algorithm so that it can be represented in your language of choice. Two small problems I encountered were ensuring the correct endianness and signedness were being used (this algorithm requires the byte order to be big endian and that unsigned integers are used).
+***
+
+TODO: Define the entire algorithm with pseudocode.
