@@ -69,7 +69,7 @@ Here's an example of the unencrypted track 1 data (cryptogram above), and below 
 ```
 
 ***
-__Note:__ As you're probably already aware, this algorithm is best described using big numbers, which can't be represented as literals in some programming languages (like Java or C#). However, many languages have classes that allow you to represent big numbers in other ways (e.g., java.math.BigInteger, System.Numerics.BigInteger). It's your job to adapt this algorithm so that it can be represented in your language of choice. Two small problems I encountered were ensuring the correct endianness and signedness were being used (this algorithm requires the byte order to be big endian and that unsigned integers are used).
+__Note:__ As you're probably already aware, this algorithm is best described using big numbers, which can't be represented as literals in some programming languages (like Java or C#). However, many languages have classes that allow you to represent big numbers in other ways (e.g., java.math.BigInteger, System.Numerics.BigInteger). It's your job to adapt this algorithm so that it can be represented in your language of choice. Two small problems I encountered were ensuring the correct endianness and signedness were being used (this algorithm requires the byte order to be big endian and that unsigned integers are used). I made a utility class called BigInt to do this for me.
 ***
 
 TODO: Define the entire algorithm with pseudocode.
