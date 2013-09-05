@@ -28,7 +28,7 @@ namespace DukptSharp
                  | Transform("TripleDES", true, bdk ^ KeyMask, (ksn & KsnMask) >> 16);
         }
 
-        public static BigInteger CreatePek(BigInteger ipek, BigInteger ksn)
+        public static BigInteger CreateSessionKey(BigInteger ipek, BigInteger ksn)
         {
             return DeriveKey(ipek, ksn) ^ PekMask;
         }
@@ -71,13 +71,13 @@ namespace DukptSharp
 
         public static byte[] Encrypt(string bdk, string ksn, byte[] track)
         {
-            return Transform("TripleDES", true, CreatePek(CreateIpek(
+            return Transform("TripleDES", true, CreateSessionKey(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
         }
 
         public static byte[] Decrypt(string bdk, string ksn, byte[] track)
         {
-            return Transform("TripleDES", false, CreatePek(CreateIpek(
+            return Transform("TripleDES", false, CreateSessionKey(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
         }
     }
