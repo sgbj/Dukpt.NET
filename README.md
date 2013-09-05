@@ -20,7 +20,7 @@ I'm sure you can find a more extensive overview of this process [somewhere else]
 1. You're given a Base Derivation Key (BDK), which you assign to a swiper (note that the same BDK _can_ be assigned to multiple swipers).
 2. You'll use the BDK along with the device's own unique Key Serial Number (KSN) to generate an Initial PIN Encryption Key (IPEK) for the device.
 3. You'll assign this IPEK to a swiper, which uses it to irreversibly generate a list of future keys, which it'll use to encrypt its messages. 
-4. The swiper also has a Key Serial Number (KSN), which it uses along with one of its future keys to encrypt a message, and after each swiper it'll increment the value of its KSN.
+4. The swiper's KSN is used along with one of its future keys to encrypt a message, and after each swipe it'll increment the value of its KSN.
 4. Whenever a swiper takes a card it formats the card's information into a series of tracks, each track having a particular set of information (e.g. card number, holder's name, expiration date). 
 5. The swiper usually encrypts these tracks using one of its generated future keys (called the "Session Key") along with its current KSN. It'll then increment the value of its KSN and discard the future key it used.
 5. At this point you'll probably have an encrypted track along with the KSN the swiper used to encrypt it.
