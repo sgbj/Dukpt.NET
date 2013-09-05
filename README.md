@@ -72,4 +72,76 @@ Here's an example of the unencrypted track 1 data (cryptogram above), and below 
 __Note:__ As you're probably already aware, this algorithm is best described using big numbers, which can't be represented as literals in some programming languages (like Java or C#). However, many languages have classes that allow you to represent big numbers in other ways (e.g., java.math.BigInteger, System.Numerics.BigInteger). It's your job to adapt this algorithm so that it can be represented in your language of choice. Two small problems I encountered were ensuring the correct endianness and signedness were being used (this algorithm requires the byte order to be big endian and that unsigned integers are used). I made a utility class called BigInt to do this for me.
 ***
 
-TODO: Define the entire algorithm with pseudocode.
+First, let's define a few standard functions:
+
+* [DES](http://en.wikipedia.org/wiki/Data_Encryption_Standard) and [Triple DES](http://en.wikipedia.org/wiki/Triple_DES) refer to their respective cryptographic algorithms. Most programming languages have access to some implementation of these ciphers either through OpenSSL or Bouncy Castle. These ciphers are initialized with a zeroed out IV of 8 bytes, they're zero-padded, and use Cipher-Block Chaining (CBC). Let's define the signatures for these standard functions that'll be used throughout this algorithm:
+  * `DesEncrypt(key, message) -> returns cryptogram`
+  * `DesDecrypt(key, cryptogram) -> returns message`
+  * `TripleDesEncrypt(key, message) -> returns cryptogram`
+  * `TripleDesDecrypt(key, cryptogram) -> returns message`
+
+First we must create the IPEK given then KSN and BDK:
+```
+CreateIpek(ksn, bdk) {
+    return TripleDesEncrypt(bdk, (ksn & KsnMask) >> 16) << 64 
+         | TripleDesEncrypt(bdk ^ KeyMask, (ksn & KsnMask) >> 16)
+}
+```
+
+Now we can get the IPEK:
+```
+ipek = CreateIpek(ksn, bdk)
+     = CreateIpek(FFFF9876543210E00008, 0123456789ABCDEFFEDCBA9876543210)
+     = INSERT_ACTUAL_IPEK_VALUE_HERE
+```
+
+After that we need a way to get the Session Key (this one is more complicated):
+```
+CreateSessionKey(ipek, ksn) {
+    return DeriveKey(ipek, ksn) ^ FF00000000000000FF
+}
+```
+
+The DeriveKey method finds the IKSN and generates session keys until it gets to the one that corresponds to the current KSN. We define this method as:
+```
+DeriveKey(ipek, ksn) {
+    ksnReg = ksn & FFFFFFFFFFE00000
+    curKey = ipek
+    for (shiftReg = 0x100000; shiftReg > 0; shiftReg >>= 1)
+        if ((shiftReg & ksn & 1FFFFF) > 0)
+            curKey = GenerateKey(curKey, ksnReg |= shiftReg)
+    return curKey
+}
+```
+
+Where the GenerateKey method looks like:
+```
+GenerateKey(key, ksn) {
+    return EncryptRegister(key ^ KeyMask, ksn) << 64 
+         | EncryptRegister(key, ksn)
+}
+```
+And EncryptRegister looks like:
+```
+EncryptRegister(key, reg) {
+    return (key & FFFFFFFFFFFFFFFF) ^ DesEncrypt((key & FFFFFFFFFFFFFFFF0000000000000000) >> 64, 
+                                                  key & FFFFFFFFFFFFFFFF ^ reg)
+}
+```
+
+Then you can generate the Session Key given the IPEK and KSN:
+```
+key = CreateSessionKey(ipek, ksn)
+    = CreateSessionKey(INSERT_ACTUAL_IPEK_VALUE_HERE, FFFF9876543210E00008)
+    = INSERT_ACTUAL_KEY_VALUE_HERE
+```
+
+Which can be used to decrypt the cryptogram:
+```
+message = TripleDesDecrypt(key, cryptogram)
+        = TripleDesDecrypt(INSERT_ACTUAL_KEY_VALUE_HERE, C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12)
+        = 2542353435323330303535313232373138395E484F47414E2F5041554C2020202020205E30383034333231303030303030303732353030303030303F00000000
+        = %B5452300551227189^HOGAN/PAUL      ^08043210000000725000000?
+```
+
+That's it, you're done!
