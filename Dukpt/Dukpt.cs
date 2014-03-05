@@ -1,7 +1,3 @@
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Modes;
-using Org.BouncyCastle.Crypto.Parameters;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -74,24 +70,6 @@ namespace DukptSharp
                     return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
                 }
             }
-        }
-
-        public static BigInteger TransformBC(string name, bool encrypt, BigInteger key, BigInteger message)
-        {
-            var cipher = new BufferedBlockCipher(new CbcBlockCipher(name == "TripleDES" ? new DesEdeEngine() : new DesEngine()));
-            var k = key.GetBytes();
-            cipher.Init(encrypt, new KeyParameter(new byte[Math.Max(0, 8 - k.Length)].Concat(key.GetBytes()).ToArray()));
-            var input = message.GetBytes();
-
-            byte[] output = new byte[cipher.GetOutputSize(input.Length)];
-            var bytesProcessed = cipher.ProcessBytes(input, 0, input.Length, output, 0);
-            var outputLength = bytesProcessed;
-            bytesProcessed = cipher.DoFinal(output, bytesProcessed);
-            outputLength += bytesProcessed;
-            var truncatedOutput = new byte[outputLength];
-            Array.Copy(output, truncatedOutput, outputLength);
-
-            return BigInt.FromBytes(truncatedOutput);
         }
 
         public static byte[] Encrypt(string bdk, string ksn, byte[] track)
