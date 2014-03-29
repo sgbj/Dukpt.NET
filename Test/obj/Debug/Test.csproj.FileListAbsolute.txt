@@ -22,3 +22,11 @@ C:\Users\ScottBatary\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Test.pdb
 C:\Users\ScottBatary\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Dukpt.dll
 C:\Users\ScottBatary\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Dukpt.pdb
 C:\Users\ScottBatary\Documents\GitHub\Dukpt.NET\Test\obj\Debug\Test.csprojResolveAssemblyReference.cache
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Test.exe.config
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Test.exe
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Test.pdb
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Dukpt.dll
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\bin\Debug\Dukpt.pdb
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\obj\Debug\Test.csprojResolveAssemblyReference.cache
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\obj\Debug\Test.exe
+C:\Users\scott\Documents\GitHub\Dukpt.NET\Test\obj\Debug\Test.pdb

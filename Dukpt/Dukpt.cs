@@ -56,11 +56,10 @@ namespace DukptSharp
         {
             using (var cipher = SymmetricAlgorithm.Create(name))
             {
-                // Bug - https://github.com/sgbj/Dukpt.NET/issues/5 - Specified key is not a valid size for this algorithm.
-                // I usually trim the zero-bytes off the front of the array in the GetBytes method, 
-                // but this algorithm expects either 8 or 16 byte keys, so GetBytes will occasionally return 7.
                 var k = key.GetBytes();
-                cipher.Key = new byte[Math.Max(0, 8 - k.Length)].Concat(key.GetBytes()).ToArray();
+                //Credit goes to ichoes (https://github.com/ichoes) for fixing this issue (https://github.com/sgbj/Dukpt.NET/issues/5)
+                //gets the next multiple of 8
+                cipher.Key = new byte[Math.Max(0, GetNearestWholeMultiple(k.Length, 8) - k.Length)].Concat(key.GetBytes()).ToArray();
                 cipher.IV = new byte[8];
                 cipher.Mode = CipherMode.CBC;
                 cipher.Padding = PaddingMode.Zeros;
@@ -70,6 +69,17 @@ namespace DukptSharp
                     return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
                 }
             }
+        }
+
+        //gets the next multiple of 8
+        //Works with both scenarios, getting 7 bytes instead of 8 and Works when expecting 16 bytes and getting 15.
+        private static int GetNearestWholeMultiple(decimal input, int X)
+        {
+            var output = Math.Round(input / X);
+            if (output == 0 && input > 0) output += 1;
+            output *= X;
+
+            return (int)output;
         }
 
         public static byte[] Encrypt(string bdk, string ksn, byte[] track)
