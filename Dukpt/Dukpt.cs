@@ -66,6 +66,8 @@ namespace DukptSharp
                 using (var crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
                 {
                     var data = message.GetBytes();
+                    //Added the GetNearestWholeMultiple here.
+                    data = new byte[Math.Max(0, GetNearestWholeMultiple(data.Length, 8) - data.Length)].Concat(message.GetBytes()).ToArray();
                     return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
                 }
             }
