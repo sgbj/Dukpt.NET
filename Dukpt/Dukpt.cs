@@ -15,6 +15,7 @@ namespace DukptSharp
         private static readonly BigInteger KeyMask = BigInt.FromHex("C0C0C0C000000000C0C0C0C000000000");
         private static readonly BigInteger PekMask = BigInt.FromHex("FF00000000000000FF");
         private static readonly BigInteger KsnMask = BigInt.FromHex("FFFFFFFFFFFFFFE00000");
+		private static readonly BigInteger DekMask = BigInt.FromHex("0000000000FF00000000000000FF0000"); // Used by IDTECH
 
         public static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
         {
@@ -31,6 +32,13 @@ namespace DukptSharp
         {
             return DeriveKey(ipek, ksn) ^ PekMask;
         }
+
+		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
+		public static BigInteger CreateSessionKey_IDTECH(BigInteger ipek, BigInteger ksn) {
+			var key = DeriveKey(ipek, ksn) ^ DekMask;
+			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
+				 | Transform("TripleDES", true, key, (key & Ls16Mask));
+		}
 
         public static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
         {
@@ -95,5 +103,12 @@ namespace DukptSharp
             return Transform("TripleDES", false, CreateSessionKey(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
         }
+
+		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
+		public static byte[] DecryptIDTech(string bdk, string ksn, byte[] track) 
+		{
+			return Transform("TripleDES", false, CreateSessionKey_IDTECH(CreateIpek(
+                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
+		}
     }
 }
