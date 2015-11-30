@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Numerics;
 
-namespace DukptSharp
+namespace DukptNet
 {
     public static class BigInt
     {

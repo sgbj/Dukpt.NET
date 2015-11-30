@@ -3,7 +3,7 @@ using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 
-namespace DukptSharp
+namespace DukptNet
 {
     public static class Dukpt
     {
@@ -34,7 +34,7 @@ namespace DukptSharp
         }
 
 		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
-		public static BigInteger CreateSessionKey_IDTECH(BigInteger ipek, BigInteger ksn) {
+		public static BigInteger CreateSessionKeyIdTech(BigInteger ipek, BigInteger ksn) {
 			var key = DeriveKey(ipek, ksn) ^ DekMask;
 			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
 				 | Transform("TripleDES", true, key, (key & Ls16Mask));
@@ -65,8 +65,8 @@ namespace DukptSharp
             using (var cipher = SymmetricAlgorithm.Create(name))
             {
                 var k = key.GetBytes();
-                //Credit goes to ichoes (https://github.com/ichoes) for fixing this issue (https://github.com/sgbj/Dukpt.NET/issues/5)
-                //gets the next multiple of 8
+                // Credit goes to ichoes (https://github.com/ichoes) for fixing this issue (https://github.com/sgbj/Dukpt.NET/issues/5)
+                // gets the next multiple of 8
                 cipher.Key = new byte[Math.Max(0, GetNearestWholeMultiple(k.Length, 8) - k.Length)].Concat(key.GetBytes()).ToArray();
                 cipher.IV = new byte[8];
                 cipher.Mode = CipherMode.CBC;
@@ -74,21 +74,20 @@ namespace DukptSharp
                 using (var crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
                 {
                     var data = message.GetBytes();
-                    //Added the GetNearestWholeMultiple here.
+                    // Added the GetNearestWholeMultiple here.
                     data = new byte[Math.Max(0, GetNearestWholeMultiple(data.Length, 8) - data.Length)].Concat(message.GetBytes()).ToArray();
                     return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
                 }
             }
         }
 
-        //gets the next multiple of 8
-        //Works with both scenarios, getting 7 bytes instead of 8 and Works when expecting 16 bytes and getting 15.
-        private static int GetNearestWholeMultiple(decimal input, int X)
+        // Gets the next multiple of 8
+        // Works with both scenarios, getting 7 bytes instead of 8 and works when expecting 16 bytes and getting 15.
+        private static int GetNearestWholeMultiple(decimal input, int multiple)
         {
-            var output = Math.Round(input / X);
+            var output = Math.Round(input / multiple);
             if (output == 0 && input > 0) output += 1;
-            output *= X;
-
+            output *= multiple;
             return (int)output;
         }
 
@@ -105,9 +104,9 @@ namespace DukptSharp
         }
 
 		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
-		public static byte[] DecryptIDTech(string bdk, string ksn, byte[] track) 
+		public static byte[] DecryptIdTech(string bdk, string ksn, byte[] track) 
 		{
-			return Transform("TripleDES", false, CreateSessionKey_IDTECH(CreateIpek(
+			return Transform("TripleDES", false, CreateSessionKeyIdTech(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
 		}
     }
