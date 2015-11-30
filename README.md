@@ -1,12 +1,18 @@
 Dukpt.NET
 =========
+[![sgbj MyGet Build Status](https://www.myget.org/BuildSource/Badge/sgbj?identifier=db407f52-a2d2-49ce-a191-cfee6a422856)](https://www.myget.org/)
 
 Dukpt.NET is a C# implementation of the Derived Unique Key Per Transaction (DUKPT) process that's described in Annex A of ANS X9.24-2004.
+
+To install Dukpt.NET, run the following command in the Package Manager Console:
+```
+PM> Install-Package Dukpt
+```
 
 Usage
 -----
 
-```CSharp
+```
 var test = "%B5452300551227189^HOGAN/PAUL      ^08043210000000725000000?\0\0\0\0";
 
 // Decrypting
@@ -14,7 +20,7 @@ var bdk = "0123456789ABCDEFFEDCBA9876543210";
 var ksn = "FFFF9876543210E00008";
 var track = "C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12";
 var decBytes = Dukpt.Decrypt(bdk, ksn, BigInt.FromHex(track).GetBytes());
-var decrypted = UTF8Encoding.UTF8.GetString(decBytes);
+var decrypted = Encoding.UTF8.GetString(decBytes);
 Console.WriteLine(decrypted == test); // True
 
 // Encrypting
