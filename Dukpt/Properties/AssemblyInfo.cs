@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Dukpt")]
+[assembly: AssemblyTitle("Dukpt.NET")]
 [assembly: AssemblyDescription("A C# implementation of the Derived Unique Key Per Transaction (DUKPT) process described in ANS X9.24-2004.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("sgbj")]
-[assembly: AssemblyProduct("Dukpt")]
+[assembly: AssemblyProduct("Dukpt.NET")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
