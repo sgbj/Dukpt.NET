@@ -1,70 +1,49 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Dukpt.NET by sgbj</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
+    <section class="page-header">
+      <h1 class="project-name">Dukpt.NET</h1>
+      <h2 class="project-tagline">A C# implementation of the Derived Unique Key Per Transaction (DUKPT) process described in ANS X9.24-2004.</h2>
+      <a href="https://github.com/sgbj/Dukpt.NET" class="btn">View on GitHub</a>
+      <a href="https://github.com/sgbj/Dukpt.NET/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/sgbj/Dukpt.NET/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-      <header>
-        <h1>Dukpt.NET</h1>
-        <p>A C# implementation of the Derived Unique Key Per Transaction (DUKPT) process described in ANS X9.24-2004.</p>
-      </header>
-
-      <div id="banner">
-        <span id="logo"></span>
-
-        <a href="https://github.com/sgbj/Dukpt.NET" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/sgbj/Dukpt.NET/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/sgbj/Dukpt.NET/tarball/master" class="button">TAR</a></li>
-          </ul>
-        </div>
-      </div><!-- end banner -->
-
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
-        <h1>
-<a name="dukptnet" class="anchor" href="#dukptnet"><span class="octicon octicon-link"></span></a>Dukpt.NET</h1>
+    <section class="main-content">
+      <h1>
+<a id="dukptnet" class="anchor" href="#dukptnet" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dukpt.NET</h1>
 
 <p>Dukpt.NET is a C# implementation of the Derived Unique Key Per Transaction (DUKPT) process that's described in Annex A of ANS X9.24-2004.</p>
 
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
-<div class="highlight highlight-CSharp"><pre><span class="kt">var</span> <span class="n">test</span> <span class="p">=</span> <span class="s">"%B5452300551227189^HOGAN/PAUL      ^08043210000000725000000?\0\0\0\0"</span><span class="p">;</span>
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">var</span> test = <span class="pl-s"><span class="pl-pds">"</span>%B5452300551227189^HOGAN/PAUL      ^08043210000000725000000?<span class="pl-cce">\0\0\0\0</span><span class="pl-pds">"</span></span>;
 
-<span class="c1">// Decrypting</span>
-<span class="kt">var</span> <span class="n">bdk</span> <span class="p">=</span> <span class="s">"0123456789ABCDEFFEDCBA9876543210"</span><span class="p">;</span>
-<span class="kt">var</span> <span class="n">ksn</span> <span class="p">=</span> <span class="s">"FFFF9876543210E00008"</span><span class="p">;</span>
-<span class="kt">var</span> <span class="n">track</span> <span class="p">=</span> <span class="s">"C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12"</span><span class="p">;</span>
-<span class="kt">var</span> <span class="n">decBytes</span> <span class="p">=</span> <span class="n">Dukpt</span><span class="p">.</span><span class="n">Decrypt</span><span class="p">(</span><span class="n">bdk</span><span class="p">,</span> <span class="n">ksn</span><span class="p">,</span> <span class="n">BigInt</span><span class="p">.</span><span class="n">FromHex</span><span class="p">(</span><span class="n">track</span><span class="p">).</span><span class="n">GetBytes</span><span class="p">());</span>
-<span class="kt">var</span> <span class="n">decrypted</span> <span class="p">=</span> <span class="n">UTF8Encoding</span><span class="p">.</span><span class="n">UTF8</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="n">decBytes</span><span class="p">);</span>
-<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">decrypted</span> <span class="p">==</span> <span class="n">test</span><span class="p">);</span> <span class="c1">// True</span>
+<span class="pl-c">// Decrypting</span>
+<span class="pl-k">var</span> bdk = <span class="pl-s"><span class="pl-pds">"</span>0123456789ABCDEFFEDCBA9876543210<span class="pl-pds">"</span></span>;
+<span class="pl-k">var</span> ksn = <span class="pl-s"><span class="pl-pds">"</span>FFFF9876543210E00008<span class="pl-pds">"</span></span>;
+<span class="pl-k">var</span> track = <span class="pl-s"><span class="pl-pds">"</span>C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12<span class="pl-pds">"</span></span>;
+<span class="pl-k">var</span> decBytes = Dukpt.Decrypt(bdk, ksn, BigInt.FromHex(track).GetBytes());
+<span class="pl-k">var</span> decrypted = UTF8Encoding.UTF8.GetString(decBytes);
+Console.WriteLine(decrypted == test); <span class="pl-c">// True</span>
 
-<span class="c1">// Encrypting</span>
-<span class="kt">var</span> <span class="n">encBytes</span> <span class="p">=</span> <span class="n">Dukpt</span><span class="p">.</span><span class="n">Encrypt</span><span class="p">(</span><span class="n">bdk</span><span class="p">,</span> <span class="n">ksn</span><span class="p">,</span> <span class="n">decBytes</span><span class="p">);</span>
-<span class="kt">var</span> <span class="n">encrypted</span> <span class="p">=</span> <span class="n">BitConverter</span><span class="p">.</span><span class="n">ToString</span><span class="p">(</span><span class="n">encBytes</span><span class="p">).</span><span class="n">Replace</span><span class="p">(</span><span class="s">"-"</span><span class="p">,</span> <span class="s">""</span><span class="p">);</span>
-<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">encrypted</span> <span class="p">==</span> <span class="n">track</span><span class="p">);</span> <span class="c1">// True</span>
-</pre></div>
+<span class="pl-c">// Encrypting</span>
+<span class="pl-k">var</span> encBytes = Dukpt.Encrypt(bdk, ksn, decBytes);
+<span class="pl-k">var</span> encrypted = BitConverter.ToString(encBytes).Replace(<span class="pl-s"><span class="pl-pds">"</span>-<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
+Console.WriteLine(encrypted == track); <span class="pl-c">// True</span></pre></div>
 
 <h2>
-<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h2>
 
 <p>It's no secret that Annex A is hard to understand, and the entire process isn't explained in a manner that's easy to follow or translate into code. One of the reasons it's difficult to understand is that it was written from the perspective of an electrical/computer engineer that would directly implement these instruction on the devices/swipers themselves, and as a result it mentions various registers and operations that most of us don't have much experience with. So it's not necessarily for high-level software developers looking to use the process either for new software, backwards compatibility with existing technology, or logging/testing purposes.</p>
 
@@ -73,7 +52,7 @@
 <p>It still amazes me how <a href="http://security.stackexchange.com/questions/13309/what-is-the-dukpt-key-derivation-function">scarcely documented</a> this process is, even though it seems like a fairly standard practice. Unfortunately, the advice people usually receive it to <a href="http://webstore.ansi.org/RecordDetail.aspx?sku=ANSI+X9.24-1%3A2009">purchase the spec</a> for $140.</p>
 
 <h2>
-<a name="key-management" class="anchor" href="#key-management"><span class="octicon octicon-link"></span></a>Key Management</h2>
+<a id="key-management" class="anchor" href="#key-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Key Management</h2>
 
 <p>I'm sure you can find a more extensive overview of this process <a href="http://en.wikipedia.org/wiki/Derived_unique_key_per_transaction#Overview">somewhere else</a>, but here's a basic outline of the technique:</p>
 
@@ -86,11 +65,17 @@
 <li>The swiper usually encrypts these tracks using one of its generated future keys (called the "Session Key") along with its current KSN. It'll then increment the value of its KSN and discard the future key it used.</li>
 <li>At this point you'll probably have an encrypted track along with the KSN the swiper used to encrypt it.</li>
 <li>It's your responsibility to determine what BDK was used to initialize this device, and from there you'll use the BDK and KSN to rederive the IPEK, which is used to rederive the Session Key, which is finally used to decrypt the message.</li>
-</ol><p>There's a lot of technical information to be said about key management, but this isn't the place for that. In some cases your provider/manufacturer (e.g. MagTek) will supply you with swipers that need to be initialized with an  IPEK, and your supplier will usually have a manual that walks you through that process. If you're doing encryption/decryption through a third party who also supplies swipers, they may have already loaded the devices with that information; what's more is they may not even given you the BDK that belongs to your device in order to reduce the risk of security threats.</p>
+</ol>
 
-<hr><p><strong>Note:</strong> Key management is beyond the scope of this project and this explanation. Whatever you do with your keys, just make sure it's secure.</p>
+<p>There's a lot of technical information to be said about key management, but this isn't the place for that. In some cases your provider/manufacturer (e.g. MagTek) will supply you with swipers that need to be initialized with an  IPEK, and your supplier will usually have a manual that walks you through that process. If you're doing encryption/decryption through a third party who also supplies swipers, they may have already loaded the devices with that information; what's more is they may not even given you the BDK that belongs to your device in order to reduce the risk of security threats.</p>
 
-<hr><p>One methodology I've seen that'll allow you to associate a particular KSN to a BDK is to take the current KSN you've been given, mask it to retrieve the Initial Key Serial Number (IKSN), and look up the BDK in a table that maps IKSNs to BDKs:</p>
+<hr>
+
+<p><strong>Note:</strong> Key management is beyond the scope of this project and this explanation. Whatever you do with your keys, just make sure it's secure.</p>
+
+<hr>
+
+<p>One methodology I've seen that'll allow you to associate a particular KSN to a BDK is to take the current KSN you've been given, mask it to retrieve the Initial Key Serial Number (IKSN), and look up the BDK in a table that maps IKSNs to BDKs:</p>
 
 <p>Example:</p>
 
@@ -101,10 +86,12 @@ iksn = ksn &amp; FFFFFFFFFFFFFFE00000 // FFFF9876543210E00000
 <p>You'd then have a table that looks like:</p>
 
 <table>
-<thead><tr>
+<thead>
+<tr>
 <th align="center">IKSN</th>
 <th align="center">BDK</th>
-</tr></thead>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td align="center">0xFFFF9876543210E00000</td>
@@ -115,14 +102,20 @@ iksn = ksn &amp; FFFFFFFFFFFFFFE00000 // FFFF9876543210E00000
 <td align="center">...</td>
 </tr>
 </tbody>
-</table><p>From which you could easily grab the BDK <code>0123456789ABCDEFFEDCBA9876543210</code>.</p>
+</table>
+
+<p>From which you could easily grab the BDK <code>0123456789ABCDEFFEDCBA9876543210</code>.</p>
 
 <h2>
-<a name="algorithm" class="anchor" href="#algorithm"><span class="octicon octicon-link"></span></a>Algorithm</h2>
+<a id="algorithm" class="anchor" href="#algorithm" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Algorithm</h2>
 
-<hr><p><strong>Note:</strong> Assume that all numeric values are hexadecimal numbers, or the representation of a sequence of bytes as a hexadecimal number.</p>
+<hr>
 
-<hr><p>The following are the BDK, KSN, and encrypted track message (cryptogram) we've been given:</p>
+<p><strong>Note:</strong> Assume that all numeric values are hexadecimal numbers, or the representation of a sequence of bytes as a hexadecimal number.</p>
+
+<hr>
+
+<p>The following are the BDK, KSN, and encrypted track message (cryptogram) we've been given:</p>
 
 <pre><code>bdk = 0123456789ABCDEFFEDCBA9876543210
 ksn = FFFF9876543210E00008
@@ -135,9 +128,13 @@ cryptogram = C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB343
 2542353435323330303535313232373138395E484F47414E2F5041554C2020202020205E30383034333231303030303030303732353030303030303F00000000
 </code></pre>
 
-<hr><p><strong>Note:</strong> As you're probably already aware, this algorithm is best described using big numbers, which can't be represented as literals in some programming languages (like Java or C#). However, many languages have classes that allow you to represent big numbers in other ways (e.g., java.math.BigInteger, System.Numerics.BigInteger). It's your job to adapt this algorithm so that it can be represented in your language of choice. Two small problems I encountered were ensuring the correct endianness and signedness were being used (this algorithm requires the byte order to be big endian and that unsigned integers are used). I made a utility class called BigInt to do this for me.</p>
+<hr>
 
-<hr><p>First, let's define a few standard functions:</p>
+<p><strong>Note:</strong> As you're probably already aware, this algorithm is best described using big numbers, which can't be represented as literals in some programming languages (like Java or C#). However, many languages have classes that allow you to represent big numbers in other ways (e.g., java.math.BigInteger, System.Numerics.BigInteger). It's your job to adapt this algorithm so that it can be represented in your language of choice. Two small problems I encountered were ensuring the correct endianness and signedness were being used (this algorithm requires the byte order to be big endian and that unsigned integers are used). I made a utility class called BigInt to do this for me.</p>
+
+<hr>
+
+<p>First, let's define a few standard functions:</p>
 
 <ul>
 <li>
@@ -150,7 +147,9 @@ cryptogram = C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB343
 <li><code>TripleDesDecrypt(key, cryptogram) -&gt; returns message</code></li>
 </ul>
 </li>
-</ul><p>First we must create the IPEK given then KSN and BDK:</p>
+</ul>
+
+<p>First we must create the IPEK given then KSN and BDK:</p>
 
 <pre><code>CreateIpek(ksn, bdk) {
     return TripleDesEncrypt(bdk, (ksn &amp; KsnMask) &gt;&gt; 16) &lt;&lt; 64 
@@ -216,13 +215,15 @@ cryptogram = C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB343
 </code></pre>
 
 <p>That's it, you're done!</p>
-      </section>
-      <footer>
-        <p>Project maintained by <a href="https://github.com/sgbj">sgbj</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/sgbj/Dukpt.NET">Dukpt.NET</a> is maintained by <a href="https://github.com/sgbj">sgbj</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+    </section>
+
+  
   </body>
 </html>
