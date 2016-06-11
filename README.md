@@ -35,7 +35,7 @@ Overview
 
 It's no secret that Annex A is hard to understand, and the entire process isn't explained in a manner that's easy to follow or translate into code. One of the reasons it's difficult to understand is that it was written from the perspective of an electrical/computer engineer that would directly implement these instruction on the devices/swipers themselves, and as a result it mentions various registers and operations that most of us don't have much experience with. So it's not necessarily for high-level software developers looking to use the process either for new software, backwards compatibility with existing technology, or logging/testing purposes.
 
-I wrote this implementation of DUKPT for fun as a side project for my work. We already had an existing implementation of DUKPT in the project I'm maintaining, which was no longer being used and hence could be stripped out. However, the old one was convoluted and had well over 500 lines of code with lots of dependencies. This library only has about 100 lines of code and only focuses on DUKPT encryption and decryption. 
+I wrote this implementation of DUKPT for fun. This library only has about 100 lines of code and only focuses on DUKPT encryption and decryption. 
 
 It still amazes me how [scarcely documented](http://security.stackexchange.com/questions/13309/what-is-the-dukpt-key-derivation-function) this process is, even though it seems like a fairly standard practice. Unfortunately, the advice people usually receive it to [purchase the spec](http://webstore.ansi.org/RecordDetail.aspx?sku=ANSI+X9.24-1%3A2009) for $140.
 
