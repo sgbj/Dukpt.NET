@@ -99,14 +99,31 @@ namespace DukptNet
 
         #region Public Methods
 
-        public static byte[] Encrypt(string bdk, string ksn, byte[] track, bool isPIN = true)
+
+        /// <summary>
+        /// Encrypt provided data using TDES DUKPT
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to encrypt</param>
+        /// <param name="isPIN">Provided data is PIN data</param>
+        /// <returns>Encrypted data</returns>
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, bool isPIN = true)
         {
-            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, isPIN), track.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, isPIN), data.ToBigInteger()).GetBytes();
         }
 
-        public static byte[] Decrypt(string bdk, string ksn, byte[] track, bool isPIN = true)
+        /// <summary>
+        /// Decrypt provided data using TDES DUKPT
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to decrypt</param>
+        /// <param name="isPIN">Provided data is PIN data</param>
+        /// <returns>Decrypted data</returns>
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, bool isPIN = true)
         {
-            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), track.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), encryptedData.ToBigInteger()).GetBytes();
         }
 
         #endregion
