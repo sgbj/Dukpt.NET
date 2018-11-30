@@ -15,7 +15,7 @@ namespace DukptNet.Test
             var ksn = "FFFF9876543210E00008";
             var track = "C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12";
 
-            var encBytes = Dukpt.Encrypt(bdk, ksn, Encoding.UTF8.GetBytes(clear), true);
+            var encBytes = Dukpt.Encrypt(bdk, ksn, Encoding.UTF8.GetBytes(clear));
 
             var encrypted = BitConverter.ToString(encBytes).Replace("-", "");
             Assert.AreEqual(encrypted, track);
@@ -29,14 +29,14 @@ namespace DukptNet.Test
             var ksn = "FFFF9876543210E00008";
             var track = "C25C1D1197D31CAA87285D59A892047426D9182EC11353C051ADD6D0F072A6CB3436560B3071FC1FD11D9F7E74886742D9BEE0CFD1EA1064C213BB55278B2F12";
 
-            var decBytes = Dukpt.Decrypt(bdk, ksn, track.HexToBigInteger().GetBytes(), true);
+            var decBytes = Dukpt.Decrypt(bdk, ksn, track.HexToBigInteger().GetBytes());
 
             var decrypted = Encoding.UTF8.GetString(decBytes);
             Assert.AreEqual(decrypted, clear);
         }
 
         [TestMethod]
-        public void TestIdTechDecryption()
+        public void TestDEKMaskDataVariantDecryption()
         {
             var clear = "%B4266841088889999^BUSH JR/GEORGE W.MR^0809101100001100000000046000000?!";
             var bdk = "0123456789ABCDEFFEDCBA9876543210";

@@ -7,6 +7,9 @@ namespace DukptNet
 {
     public static class Dukpt
     {
+
+        #region Private Mask Constants
+
         private static readonly BigInteger Reg3Mask = "1FFFFF".HexToBigInteger();
         private static readonly BigInteger ShiftRegMask = "100000".HexToBigInteger();
         private static readonly BigInteger Reg8Mask = "FFFFFFFFFFE00000".HexToBigInteger();
@@ -17,23 +20,27 @@ namespace DukptNet
         private static readonly BigInteger KsnMask = "FFFFFFFFFFFFFFE00000".HexToBigInteger();
 		private static readonly BigInteger DekMask = "0000000000FF00000000000000FF0000".HexToBigInteger();
 
-        public static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
+        #endregion
+
+        #region Private Methods
+
+        private static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
         {
             return key1 ^ key2;
         }
 
-        public static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
+        private static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
         {
             return Transform("TripleDES", true, bdk, (ksn & KsnMask) >> 16) << 64
                  | Transform("TripleDES", true, bdk ^ KeyMask, (ksn & KsnMask) >> 16);
         }
 
-        public static BigInteger CreateSessionKeyPEK(BigInteger ipek, BigInteger ksn)
+        private static BigInteger CreateSessionKeyPEK(BigInteger ipek, BigInteger ksn)
         {
             return DeriveKey(ipek, ksn) ^ PekMask;
         }
 
-		public static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn) {
+        private static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn) {
 			var key = DeriveKey(ipek, ksn) ^ DekMask;
 			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
 				 | Transform("TripleDES", true, key, (key & Ls16Mask));
@@ -47,7 +54,7 @@ namespace DukptNet
             return sessionKey;
         }
 
-        public static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
+        private static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
         {
             var ksnReg = ksn & Ls16Mask & Reg8Mask;
             var curKey = ipek;
@@ -57,17 +64,17 @@ namespace DukptNet
             return curKey;
         }
 
-        public static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
+        private static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
         {
             return EncryptRegister(key ^ KeyMask, ksn) << 64 | EncryptRegister(key, ksn);
         }
 
-        public static BigInteger EncryptRegister(BigInteger curKey, BigInteger reg8)
+        private static BigInteger EncryptRegister(BigInteger curKey, BigInteger reg8)
         {
             return (curKey & Ls16Mask) ^ Transform("DES", true, (curKey & Ms16Mask) >> 64, (curKey & Ls16Mask ^ reg8));
         }
 
-        public static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
+        private static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
         {
             using (var cipher = SymmetricAlgorithm.Create(name))
             {
@@ -93,15 +100,21 @@ namespace DukptNet
             return (int)output;
         }
 
-        public static byte[] Encrypt(string bdk, string ksn, byte[] track, bool isPIN = false)
+        #endregion
+
+        #region Public Methods
+
+        public static byte[] Encrypt(string bdk, string ksn, byte[] track, bool isPIN = true)
         {
             return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, isPIN), track.ToBigInteger()).GetBytes();
         }
 
-        public static byte[] Decrypt(string bdk, string ksn, byte[] track, bool isPIN = false)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] track, bool isPIN = true)
         {
             return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), track.ToBigInteger()).GetBytes();
         }
+
+        #endregion
 
     }
 }
