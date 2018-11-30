@@ -15,7 +15,7 @@ namespace DukptNet
         private static readonly BigInteger KeyMask = BigInt.FromHex("C0C0C0C000000000C0C0C0C000000000");
         private static readonly BigInteger PekMask = BigInt.FromHex("FF00000000000000FF");
         private static readonly BigInteger KsnMask = BigInt.FromHex("FFFFFFFFFFFFFFE00000");
-		private static readonly BigInteger DekMask = BigInt.FromHex("0000000000FF00000000000000FF0000"); // Used by IDTECH
+		private static readonly BigInteger DekMask = BigInt.FromHex("0000000000FF00000000000000FF0000");
 
         public static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
         {
@@ -64,8 +64,6 @@ namespace DukptNet
             using (var cipher = SymmetricAlgorithm.Create(name))
             {
                 var k = key.GetBytes();
-                // Credit goes to ichoes (https://github.com/ichoes) for fixing this issue (https://github.com/sgbj/Dukpt.NET/issues/5)
-                // gets the next multiple of 8
                 cipher.Key = new byte[Math.Max(0, GetNearestWholeMultiple(k.Length, 8) - k.Length)].Concat(key.GetBytes()).ToArray();
                 cipher.IV = new byte[8];
                 cipher.Mode = CipherMode.CBC;
@@ -73,15 +71,12 @@ namespace DukptNet
                 using (var crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
                 {
                     var data = message.GetBytes();
-                    // Added the GetNearestWholeMultiple here.
                     data = new byte[Math.Max(0, GetNearestWholeMultiple(data.Length, 8) - data.Length)].Concat(message.GetBytes()).ToArray();
                     return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
                 }
             }
         }
 
-        // Gets the next multiple of 8
-        // Works with both scenarios, getting 7 bytes instead of 8 and works when expecting 16 bytes and getting 15.
         private static int GetNearestWholeMultiple(decimal input, int multiple)
         {
             var output = Math.Round(input / multiple);
@@ -102,7 +97,6 @@ namespace DukptNet
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
         }
 
-		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
 		public static byte[] DecryptIdTech(string bdk, string ksn, byte[] track) 
 		{
 			return Transform("TripleDES", false, CreateSessionKeyDEK(CreateIpek(
