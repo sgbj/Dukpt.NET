@@ -28,13 +28,12 @@ namespace DukptNet
                  | Transform("TripleDES", true, bdk ^ KeyMask, (ksn & KsnMask) >> 16);
         }
 
-        public static BigInteger CreateSessionKey(BigInteger ipek, BigInteger ksn)
+        public static BigInteger CreateSessionKeyPEK(BigInteger ipek, BigInteger ksn)
         {
             return DeriveKey(ipek, ksn) ^ PekMask;
         }
 
-		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
-		public static BigInteger CreateSessionKeyIdTech(BigInteger ipek, BigInteger ksn) {
+		public static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn) {
 			var key = DeriveKey(ipek, ksn) ^ DekMask;
 			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
 				 | Transform("TripleDES", true, key, (key & Ls16Mask));
@@ -93,20 +92,20 @@ namespace DukptNet
 
         public static byte[] Encrypt(string bdk, string ksn, byte[] track)
         {
-            return Transform("TripleDES", true, CreateSessionKey(CreateIpek(
+            return Transform("TripleDES", true, CreateSessionKeyPEK(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
         }
 
         public static byte[] Decrypt(string bdk, string ksn, byte[] track)
         {
-            return Transform("TripleDES", false, CreateSessionKey(CreateIpek(
+            return Transform("TripleDES", false, CreateSessionKeyPEK(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
         }
 
 		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
 		public static byte[] DecryptIdTech(string bdk, string ksn, byte[] track) 
 		{
-			return Transform("TripleDES", false, CreateSessionKeyIdTech(CreateIpek(
+			return Transform("TripleDES", false, CreateSessionKeyDEK(CreateIpek(
                 BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
 		}
     }
