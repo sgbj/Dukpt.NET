@@ -7,15 +7,15 @@ namespace DukptNet
 {
     public static class Dukpt
     {
-        private static readonly BigInteger Reg3Mask = BigInt.FromHex("1FFFFF");
-        private static readonly BigInteger ShiftRegMask = BigInt.FromHex("100000");
-        private static readonly BigInteger Reg8Mask = BigInt.FromHex("FFFFFFFFFFE00000");
-        private static readonly BigInteger Ls16Mask = BigInt.FromHex("FFFFFFFFFFFFFFFF");
-        private static readonly BigInteger Ms16Mask = BigInt.FromHex("FFFFFFFFFFFFFFFF0000000000000000");
-        private static readonly BigInteger KeyMask = BigInt.FromHex("C0C0C0C000000000C0C0C0C000000000");
-        private static readonly BigInteger PekMask = BigInt.FromHex("FF00000000000000FF");
-        private static readonly BigInteger KsnMask = BigInt.FromHex("FFFFFFFFFFFFFFE00000");
-		private static readonly BigInteger DekMask = BigInt.FromHex("0000000000FF00000000000000FF0000");
+        private static readonly BigInteger Reg3Mask = "1FFFFF".HexToBigInteger();
+        private static readonly BigInteger ShiftRegMask = "100000".HexToBigInteger();
+        private static readonly BigInteger Reg8Mask = "FFFFFFFFFFE00000".HexToBigInteger();
+        private static readonly BigInteger Ls16Mask = "FFFFFFFFFFFFFFFF".HexToBigInteger();
+        private static readonly BigInteger Ms16Mask = "FFFFFFFFFFFFFFFF0000000000000000".HexToBigInteger();
+        private static readonly BigInteger KeyMask = "C0C0C0C000000000C0C0C0C000000000".HexToBigInteger();
+        private static readonly BigInteger PekMask = "FF00000000000000FF".HexToBigInteger();
+        private static readonly BigInteger KsnMask = "FFFFFFFFFFFFFFE00000".HexToBigInteger();
+		private static readonly BigInteger DekMask = "0000000000FF00000000000000FF0000".HexToBigInteger();
 
         public static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
         {
@@ -72,7 +72,7 @@ namespace DukptNet
                 {
                     var data = message.GetBytes();
                     data = new byte[Math.Max(0, GetNearestWholeMultiple(data.Length, 8) - data.Length)].Concat(message.GetBytes()).ToArray();
-                    return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
+                    return crypto.TransformFinalBlock(data, 0, data.Length).ToBigInteger();
                 }
             }
         }
@@ -88,19 +88,19 @@ namespace DukptNet
         public static byte[] Encrypt(string bdk, string ksn, byte[] track)
         {
             return Transform("TripleDES", true, CreateSessionKeyPEK(CreateIpek(
-                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
+               ksn.HexToBigInteger(), bdk.HexToBigInteger()), ksn.HexToBigInteger()), track.ToBigInteger()).GetBytes();
         }
 
         public static byte[] Decrypt(string bdk, string ksn, byte[] track)
         {
             return Transform("TripleDES", false, CreateSessionKeyPEK(CreateIpek(
-                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
+                ksn.HexToBigInteger(), bdk.HexToBigInteger()), ksn.HexToBigInteger()), track.ToBigInteger()).GetBytes();
         }
 
 		public static byte[] DecryptIdTech(string bdk, string ksn, byte[] track) 
 		{
 			return Transform("TripleDES", false, CreateSessionKeyDEK(CreateIpek(
-                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
-		}
+                ksn.HexToBigInteger(), bdk.HexToBigInteger()), ksn.HexToBigInteger()), track.ToBigInteger()).GetBytes();
+        }
     }
 }
