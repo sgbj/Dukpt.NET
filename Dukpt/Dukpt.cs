@@ -24,11 +24,6 @@ namespace DukptNet
 
         #region Private Methods
 
-        private static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
-        {
-            return key1 ^ key2;
-        }
-
         private static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
         {
             return Transform("TripleDES", true, bdk, (ksn & KsnMask) >> 16) << 64
