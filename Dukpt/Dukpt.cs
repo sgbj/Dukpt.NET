@@ -39,6 +39,14 @@ namespace DukptNet
 				 | Transform("TripleDES", true, key, (key & Ls16Mask));
 		}
 
+        private static BigInteger CreateSessionKey(string bdk, string ksn, bool isPIN)
+        {
+            BigInteger ksnBigInt = ksn.HexToBigInteger();
+            BigInteger ipek = CreateIpek(ksnBigInt, bdk.HexToBigInteger());
+            BigInteger sessionKey = isPIN ? CreateSessionKeyPEK(ipek, ksnBigInt) : CreateSessionKeyDEK(ipek, ksnBigInt);
+            return sessionKey;
+        }
+
         public static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
         {
             var ksnReg = ksn & Ls16Mask & Reg8Mask;
@@ -85,22 +93,15 @@ namespace DukptNet
             return (int)output;
         }
 
-        public static byte[] Encrypt(string bdk, string ksn, byte[] track)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] track, bool isPIN = false)
         {
-            return Transform("TripleDES", true, CreateSessionKeyPEK(CreateIpek(
-               ksn.HexToBigInteger(), bdk.HexToBigInteger()), ksn.HexToBigInteger()), track.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, isPIN), track.ToBigInteger()).GetBytes();
         }
 
-        public static byte[] Decrypt(string bdk, string ksn, byte[] track)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] track, bool isPIN = false)
         {
-            return Transform("TripleDES", false, CreateSessionKeyPEK(CreateIpek(
-                ksn.HexToBigInteger(), bdk.HexToBigInteger()), ksn.HexToBigInteger()), track.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), track.ToBigInteger()).GetBytes();
         }
 
-		public static byte[] DecryptIdTech(string bdk, string ksn, byte[] track) 
-		{
-			return Transform("TripleDES", false, CreateSessionKeyDEK(CreateIpek(
-                ksn.HexToBigInteger(), bdk.HexToBigInteger()), ksn.HexToBigInteger()), track.ToBigInteger()).GetBytes();
-        }
     }
 }
