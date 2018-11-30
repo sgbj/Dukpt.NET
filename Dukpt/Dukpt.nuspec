@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>Copyright 2015</copyright>
-    <tags>DUKPT Dukpt.NET</tags>
+    <tags>DUKPT Dukpt.NET TDES 3DES x9.24</tags>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Numerics" targetFramework="net40" />
     </frameworkAssemblies>
