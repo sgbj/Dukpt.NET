@@ -135,7 +135,7 @@ namespace DukptNet
         /// <returns>Decrypted data</returns>
         public static byte[] DecryptIdTech(string bdk, string ksn, byte[] encryptedData)
         {
-            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, false), encryptedData.ToBigInteger()).GetBytes();
+            return Decrypt(bdk, ksn, encryptedData, false);
         }
 
         #endregion
