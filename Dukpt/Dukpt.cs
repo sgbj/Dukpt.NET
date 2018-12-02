@@ -36,7 +36,7 @@ namespace DukptNet
         }
 
         private static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn) {
-			var key = DeriveKey(ipek, ksn) ^ DekMask;
+			BigInteger key = DeriveKey(ipek, ksn) ^ DekMask;
 			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
 				 | Transform("TripleDES", true, key, (key & Ls16Mask));
 		}
@@ -51,11 +51,15 @@ namespace DukptNet
 
         private static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
         {
-            var ksnReg = ksn & Ls16Mask & Reg8Mask;
-            var curKey = ipek;
-            for (var shiftReg = ShiftRegMask; shiftReg > 0; shiftReg >>= 1)
+            BigInteger ksnReg = ksn & Ls16Mask & Reg8Mask;
+            BigInteger curKey = ipek;
+            for (BigInteger shiftReg = ShiftRegMask; shiftReg > 0; shiftReg >>= 1)
+            {
                 if ((shiftReg & ksn & Reg3Mask) > 0)
+                {
                     curKey = GenerateKey(curKey, ksnReg |= shiftReg);
+                }
+            }
             return curKey;
         }
 
@@ -71,16 +75,16 @@ namespace DukptNet
 
         private static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
         {
-            using (var cipher = SymmetricAlgorithm.Create(name))
+            using (SymmetricAlgorithm cipher = SymmetricAlgorithm.Create(name))
             {
-                var k = key.GetBytes();
+                byte[] k = key.GetBytes();
                 cipher.Key = new byte[Math.Max(0, GetNearestWholeMultiple(k.Length, 8) - k.Length)].Concat(key.GetBytes()).ToArray();
                 cipher.IV = new byte[8];
                 cipher.Mode = CipherMode.CBC;
                 cipher.Padding = PaddingMode.Zeros;
-                using (var crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
+                using (ICryptoTransform crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
                 {
-                    var data = message.GetBytes();
+                    byte[] data = message.GetBytes();
                     data = new byte[Math.Max(0, GetNearestWholeMultiple(data.Length, 8) - data.Length)].Concat(message.GetBytes()).ToArray();
                     return crypto.TransformFinalBlock(data, 0, data.Length).ToBigInteger();
                 }
@@ -89,8 +93,11 @@ namespace DukptNet
 
         private static int GetNearestWholeMultiple(decimal input, int multiple)
         {
-            var output = Math.Round(input / multiple);
-            if (output == 0 && input > 0) output += 1;
+            decimal output = Math.Round(input / multiple);
+            if (output == 0 && input > 0)
+            {
+                output += 1;
+            }
             output *= multiple;
             return (int)output;
         }
@@ -105,7 +112,7 @@ namespace DukptNet
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
         /// <param name="data">Data to encrypt</param>
-        /// <param name="isPIN">Provided data is PIN data</param>
+        /// <param name="isPIN">Provided data is PIN data (use PEK mask)</param>
         /// <returns>Encrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
         public static byte[] Encrypt(string bdk, string ksn, byte[] data, bool isPIN = true)
@@ -132,7 +139,7 @@ namespace DukptNet
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
         /// <param name="data">Data to decrypt</param>
-        /// <param name="isPIN">Provided data is PIN data</param>
+        /// <param name="isPIN">Provided data is PIN data (use PEK mask)</param>
         /// <returns>Decrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
         public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, bool isPIN = true)
