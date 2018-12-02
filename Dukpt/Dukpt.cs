@@ -99,7 +99,6 @@ namespace DukptNet
 
         #region Public Methods
 
-
         /// <summary>
         /// Encrypt provided data using TDES DUKPT
         /// </summary>
@@ -124,6 +123,19 @@ namespace DukptNet
         public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, bool isPIN = true)
         {
             return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), encryptedData.ToBigInteger()).GetBytes();
+        }
+
+        /// <summary>
+        /// Decrypt provided data using TDES DUKPT using DEK mask
+        /// Backwards-compatible with previous versions of Dukpt.NET
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to decrypt</param>
+        /// <returns>Decrypted data</returns>
+        public static byte[] DecryptIdTech(string bdk, string ksn, byte[] encryptedData)
+        {
+            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, false), encryptedData.ToBigInteger()).GetBytes();
         }
 
         #endregion
