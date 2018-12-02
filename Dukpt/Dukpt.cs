@@ -107,8 +107,22 @@ namespace DukptNet
         /// <param name="data">Data to encrypt</param>
         /// <param name="isPIN">Provided data is PIN data</param>
         /// <returns>Encrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
         public static byte[] Encrypt(string bdk, string ksn, byte[] data, bool isPIN = true)
         {
+            if (string.IsNullOrEmpty(bdk))
+            {
+                throw new ArgumentNullException(nameof(bdk));
+            }
+            if (string.IsNullOrEmpty(ksn))
+            {
+                throw new ArgumentNullException(nameof(ksn));
+            }
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
             return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, isPIN), data.ToBigInteger()).GetBytes();
         }
 
@@ -120,8 +134,22 @@ namespace DukptNet
         /// <param name="data">Data to decrypt</param>
         /// <param name="isPIN">Provided data is PIN data</param>
         /// <returns>Decrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
         public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, bool isPIN = true)
         {
+            if (string.IsNullOrEmpty(bdk))
+            {
+                throw new ArgumentNullException(nameof(bdk));
+            }
+            if (string.IsNullOrEmpty(ksn))
+            {
+                throw new ArgumentNullException(nameof(ksn));
+            }
+            if (encryptedData == null)
+            {
+                throw new ArgumentNullException(nameof(encryptedData));
+            }
+
             return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), encryptedData.ToBigInteger()).GetBytes();
         }
 
