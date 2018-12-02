@@ -52,7 +52,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="DukptTest.cs" />
+    <Compile Include="DukptBackwardsCompatibilityTests.cs" />
+    <Compile Include="DukptTests.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
