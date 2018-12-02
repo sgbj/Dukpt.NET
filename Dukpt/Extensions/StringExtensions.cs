@@ -2,7 +2,7 @@
 
 namespace DukptNet
 {
-    public static class StringExtensions
+    internal static class StringExtensions
     {
         public static BigInteger HexToBigInteger(this string str)
         {

@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace DukptNet
 {
-    public static class ByteExtensions
+    internal static class ByteExtensions
     {
         public static BigInteger ToBigInteger(this byte[] bytes)
         {

@@ -53,6 +53,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DukptTest.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
