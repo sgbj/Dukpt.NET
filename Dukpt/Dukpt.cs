@@ -76,7 +76,7 @@ namespace DukptNet
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
-        /// <param name="usePEKMask">Use PEK mask for PIN data</param>
+        /// <param name="dukptVariant">DUKPT variant used to determine session key creation method</param>
         /// <returns>Session Key</returns>
         private static BigInteger CreateSessionKey(string bdk, string ksn, DukptVariant dukptVariant)
         {
@@ -125,7 +125,7 @@ namespace DukptNet
         /// </summary>
         /// <param name="key">Key</param>
         /// <param name="ksn">Key Serial Number</param>
-        /// <returns>Key generaged from provided key and KSN</returns>
+        /// <returns>Key generated from provided key and KSN</returns>
         private static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
         {
             return EncryptRegister(key ^ KeyMask, ksn) << 64 | EncryptRegister(key, ksn);
@@ -134,7 +134,7 @@ namespace DukptNet
         /// <summary>
         /// Encrypt Register
         /// </summary>
-        /// <param name="key">DES Key</param>
+        /// <param name="key">Key</param>
         /// <param name="reg8">Register which to encrypt</param>
         /// <returns>Encrypted register value</returns>
         private static BigInteger EncryptRegister(BigInteger key, BigInteger reg8)
@@ -149,7 +149,7 @@ namespace DukptNet
         /// <param name="encrypt">Encrypt data flag</param>
         /// <param name="key">Encryption key</param>
         /// <param name="message">Data to encrypt or decrypt</param>
-        /// <returns>Result of transform (encryption or decryption)</returns>
+        /// <returns>Result of transformation (encryption or decryption)</returns>
         private static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
         {
             using (SymmetricAlgorithm cipher = SymmetricAlgorithm.Create(name))
@@ -169,11 +169,11 @@ namespace DukptNet
         }
 
         /// <summary>
-        /// Get nearest whole multiple value of provided decimal value
+        /// Get nearest whole value of provided decimal value which is a multiple of provided integer
         /// </summary>
         /// <param name="input">Number which to determine nearest whole multiple</param>
         /// <param name="multiple">Multiple in which to divide input</param>
-        /// <returns>Whole value of input nearest to multiple</returns>
+        /// <returns>Whole integer value of input nearest to a multiple of provided decimal</returns>
         private static int GetNearestWholeMultiple(decimal input, int multiple)
         {
             decimal output = Math.Round(input / multiple);
@@ -190,7 +190,7 @@ namespace DukptNet
         #region Public Methods
 
         /// <summary>
-        /// Encrypt provided data using TDES DUKPT
+        /// Encrypt data using TDES DUKPT.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
@@ -217,7 +217,7 @@ namespace DukptNet
         }
 
         /// <summary>
-        /// Decrypt provided data using TDES DUKPT
+        /// Decrypt data using TDES DUKPT.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
@@ -244,8 +244,8 @@ namespace DukptNet
         }
 
         /// <summary>
-        /// Decrypt provided data using TDES DUKPT using DEK mask
-        /// Backwards-compatible with previous versions of Dukpt.NET
+        /// Decrypt data using TDES DUKPT Data variant.
+        /// Backwards-compatible with previous versions of Dukpt.NET.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
