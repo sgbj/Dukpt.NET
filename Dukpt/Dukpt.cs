@@ -18,7 +18,8 @@ namespace DukptNet
         private static readonly BigInteger KeyMask = "C0C0C0C000000000C0C0C0C000000000".HexToBigInteger();
         private static readonly BigInteger PekMask = "FF00000000000000FF".HexToBigInteger();
         private static readonly BigInteger KsnMask = "FFFFFFFFFFFFFFE00000".HexToBigInteger();
-		private static readonly BigInteger DekMask = "0000000000FF00000000000000FF0000".HexToBigInteger();
+        private static readonly BigInteger DekMask = "0000000000FF00000000000000FF0000".HexToBigInteger();
+        private static readonly BigInteger MacMask = "000000000000FF00000000000000FF00".HexToBigInteger();
 
         #endregion
 
@@ -48,6 +49,17 @@ namespace DukptNet
         }
 
         /// <summary>
+        /// Create Session Key with MAC Mask
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Session Key</returns>
+        private static BigInteger CreateSessionKeyMAC(BigInteger ipek, BigInteger ksn)
+        {
+            return DeriveKey(ipek, ksn) ^ MacMask;
+        }
+
+        /// <summary>
         /// Create Session Key with DEK Mask
         /// </summary>
         /// <param name="ipek">Initial PIN Encryption Key</param>
@@ -66,11 +78,25 @@ namespace DukptNet
         /// <param name="ksn">Key Serial Number</param>
         /// <param name="usePEKMask">Use PEK mask for PIN data</param>
         /// <returns>Session Key</returns>
-        private static BigInteger CreateSessionKey(string bdk, string ksn, bool usePEKMask)
+        private static BigInteger CreateSessionKey(string bdk, string ksn, DukptVariants dukptVariant)
         {
             BigInteger ksnBigInt = ksn.HexToBigInteger();
             BigInteger ipek = CreateIpek(ksnBigInt, bdk.HexToBigInteger());
-            BigInteger sessionKey = usePEKMask ? CreateSessionKeyPEK(ipek, ksnBigInt) : CreateSessionKeyDEK(ipek, ksnBigInt);
+            BigInteger sessionKey;
+            switch (dukptVariant)
+            {
+                case DukptVariants.MAC:
+                    sessionKey = CreateSessionKeyMAC(ipek, ksnBigInt);
+                    break;
+                case DukptVariants.Data:
+                    sessionKey = CreateSessionKeyDEK(ipek, ksnBigInt);
+                    break;
+                case DukptVariants.PIN:
+                default:
+                    sessionKey = CreateSessionKeyPEK(ipek, ksnBigInt);
+                    break;
+
+            }
             return sessionKey;
         }
 
@@ -169,10 +195,10 @@ namespace DukptNet
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
         /// <param name="data">Data to encrypt</param>
-        /// <param name="isPIN">Provided data is PIN data (use PEK mask)</param>
+        /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Encrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DukptVariants dataVariant = DukptVariants.PIN)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DukptVariants variant = DukptVariants.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -187,7 +213,7 @@ namespace DukptNet
                 throw new ArgumentNullException(nameof(data));
             }
 
-            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, dataVariant == DukptVariants.PIN), data.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, variant), data.ToBigInteger()).GetBytes();
         }
 
         /// <summary>
@@ -196,10 +222,10 @@ namespace DukptNet
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
         /// <param name="data">Data to decrypt</param>
-        /// <param name="isPIN">Provided data is PIN data (use PEK mask)</param>
+        /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Decrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DukptVariants dataVariant = DukptVariants.PIN)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DukptVariants variant = DukptVariants.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -214,7 +240,7 @@ namespace DukptNet
                 throw new ArgumentNullException(nameof(encryptedData));
             }
 
-            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, dataVariant == DukptVariants.PIN), encryptedData.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, variant), encryptedData.ToBigInteger()).GetBytes();
         }
 
         /// <summary>
