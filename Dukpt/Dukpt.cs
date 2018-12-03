@@ -19,7 +19,6 @@ namespace DukptNet
         private static readonly BigInteger PekMask = "FF00000000000000FF".HexToBigInteger();
         private static readonly BigInteger KsnMask = "FFFFFFFFFFFFFFE00000".HexToBigInteger();
         private static readonly BigInteger DekMask = "0000000000FF00000000000000FF0000".HexToBigInteger();
-        private static readonly BigInteger MacMask = "000000000000FF00000000000000FF00".HexToBigInteger();
 
         #endregion
 
@@ -49,17 +48,6 @@ namespace DukptNet
         }
 
         /// <summary>
-        /// Create Session Key with MAC Mask
-        /// </summary>
-        /// <param name="ipek">Initial PIN Encryption Key</param>
-        /// <param name="ksn">Key Serial Number</param>
-        /// <returns>Session Key</returns>
-        private static BigInteger CreateSessionKeyMAC(BigInteger ipek, BigInteger ksn)
-        {
-            return DeriveKey(ipek, ksn) ^ MacMask;
-        }
-
-        /// <summary>
         /// Create Session Key with DEK Mask
         /// </summary>
         /// <param name="ipek">Initial PIN Encryption Key</param>
@@ -85,9 +73,6 @@ namespace DukptNet
             BigInteger sessionKey;
             switch (dukptVariant)
             {
-                case DukptVariant.MAC:
-                    sessionKey = CreateSessionKeyMAC(ipek, ksnBigInt);
-                    break;
                 case DukptVariant.Data:
                     sessionKey = CreateSessionKeyDEK(ipek, ksnBigInt);
                     break;
