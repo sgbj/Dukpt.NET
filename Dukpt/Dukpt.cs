@@ -78,20 +78,20 @@ namespace DukptNet
         /// <param name="ksn">Key Serial Number</param>
         /// <param name="usePEKMask">Use PEK mask for PIN data</param>
         /// <returns>Session Key</returns>
-        private static BigInteger CreateSessionKey(string bdk, string ksn, DukptVariants dukptVariant)
+        private static BigInteger CreateSessionKey(string bdk, string ksn, DukptVariant dukptVariant)
         {
             BigInteger ksnBigInt = ksn.HexToBigInteger();
             BigInteger ipek = CreateIpek(ksnBigInt, bdk.HexToBigInteger());
             BigInteger sessionKey;
             switch (dukptVariant)
             {
-                case DukptVariants.MAC:
+                case DukptVariant.MAC:
                     sessionKey = CreateSessionKeyMAC(ipek, ksnBigInt);
                     break;
-                case DukptVariants.Data:
+                case DukptVariant.Data:
                     sessionKey = CreateSessionKeyDEK(ipek, ksnBigInt);
                     break;
-                case DukptVariants.PIN:
+                case DukptVariant.PIN:
                 default:
                     sessionKey = CreateSessionKeyPEK(ipek, ksnBigInt);
                     break;
@@ -198,7 +198,7 @@ namespace DukptNet
         /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Encrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DukptVariants variant = DukptVariants.PIN)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DukptVariant variant = DukptVariant.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -225,7 +225,7 @@ namespace DukptNet
         /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Decrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DukptVariants variant = DukptVariants.PIN)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DukptVariant variant = DukptVariant.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -253,7 +253,7 @@ namespace DukptNet
         /// <returns>Decrypted data</returns>
         public static byte[] DecryptIdTech(string bdk, string ksn, byte[] encryptedData)
         {
-            return Decrypt(bdk, ksn, encryptedData, DukptVariants.Data);
+            return Decrypt(bdk, ksn, encryptedData, DukptVariant.Data);
         }
 
         #endregion
