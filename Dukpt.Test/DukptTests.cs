@@ -29,35 +29,35 @@ namespace DukptNet.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Encryption_Null_Data()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, _ksn, null, true);
+            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, _ksn, null, DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Encryption_Null_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(null, _ksn, Encoding.UTF8.GetBytes(_clearData), true);
+            byte[] decryptedBytes = Dukpt.Encrypt(null, _ksn, Encoding.UTF8.GetBytes(_clearData), DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Encryption_Null_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, null, Encoding.UTF8.GetBytes(_clearData), true);
+            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, null, Encoding.UTF8.GetBytes(_clearData), DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Encryption_Empty_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(string.Empty, _ksn, Encoding.UTF8.GetBytes(_clearData), true);
+            byte[] decryptedBytes = Dukpt.Encrypt(string.Empty, _ksn, Encoding.UTF8.GetBytes(_clearData), DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Encryption_Empty_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, string.Empty, Encoding.UTF8.GetBytes(_clearData), true);
+            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, string.Empty, Encoding.UTF8.GetBytes(_clearData), DukptVariants.PIN);
         }
 
         [TestMethod]
@@ -72,35 +72,35 @@ namespace DukptNet.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Decryption_Null_Data()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, _ksn, null, true);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, _ksn, null, DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Decryption_Null_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(null, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), true);
+            byte[] decryptedBytes = Dukpt.Decrypt(null, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Decryption_Null_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, null, _expectedEncryptedHexDEK.HexStringToByteArray(), true);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, null, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Decryption_Empty_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(string.Empty, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), true);
+            byte[] decryptedBytes = Dukpt.Decrypt(string.Empty, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.PIN);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_PEK_Decryption_Empty_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, string.Empty, _expectedEncryptedHexDEK.HexStringToByteArray(), true);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, string.Empty, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.PIN);
         }
 
         #endregion
@@ -110,7 +110,7 @@ namespace DukptNet.Test
         [TestMethod]
         public void Test_DEK_Encryption()
         {
-            byte[] encryptedBytes = Dukpt.Encrypt(_bdk, _ksn, Encoding.UTF8.GetBytes(_clearData), false);
+            byte[] encryptedBytes = Dukpt.Encrypt(_bdk, _ksn, Encoding.UTF8.GetBytes(_clearData), DukptVariants.Data);
             string encryptedHexResult = BitConverter.ToString(encryptedBytes).Replace("-", "");
             Assert.AreEqual(encryptedHexResult, _expectedEncryptedHexDEK);
         }
@@ -119,41 +119,41 @@ namespace DukptNet.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Encryption_Null_Data()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, _ksn, null, false);
+            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, _ksn, null, DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Encryption_Null_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(null, _ksn, Encoding.UTF8.GetBytes(_clearData), false);
+            byte[] decryptedBytes = Dukpt.Encrypt(null, _ksn, Encoding.UTF8.GetBytes(_clearData), DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Encryption_Null_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, null, Encoding.UTF8.GetBytes(_clearData), false);
+            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, null, Encoding.UTF8.GetBytes(_clearData), DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Encryption_Empty_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(string.Empty, _ksn, Encoding.UTF8.GetBytes(_clearData), false);
+            byte[] decryptedBytes = Dukpt.Encrypt(string.Empty, _ksn, Encoding.UTF8.GetBytes(_clearData), DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Encryption_Empty_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, string.Empty, Encoding.UTF8.GetBytes(_clearData), false);
+            byte[] decryptedBytes = Dukpt.Encrypt(_bdk, string.Empty, Encoding.UTF8.GetBytes(_clearData), DukptVariants.Data);
         }
 
         [TestMethod]
         public void Test_DEK_Decryption()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), false);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.Data);
             string decryptedData = Encoding.UTF8.GetString(decryptedBytes);
             Assert.AreEqual(decryptedData, _clearData);
         }
@@ -162,35 +162,35 @@ namespace DukptNet.Test
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Decryption_Null_Data()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, _ksn, null, false);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, _ksn, null, DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Decryption_Null_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(null, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), false);
+            byte[] decryptedBytes = Dukpt.Decrypt(null, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Decryption_Null_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, null, _expectedEncryptedHexDEK.HexStringToByteArray(), false);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, null, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Decryption_Empty_BDK()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(string.Empty, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), false);
+            byte[] decryptedBytes = Dukpt.Decrypt(string.Empty, _ksn, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.Data);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Test_DEK_Decryption_Empty_KSN()
         {
-            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, string.Empty, _expectedEncryptedHexDEK.HexStringToByteArray(), false);
+            byte[] decryptedBytes = Dukpt.Decrypt(_bdk, string.Empty, _expectedEncryptedHexDEK.HexStringToByteArray(), DukptVariants.Data);
         }
 
         #endregion

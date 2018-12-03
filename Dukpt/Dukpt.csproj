@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dukpt.cs" />
+    <Compile Include="Enumerations\DukptVariants.cs" />
     <Compile Include="Extensions\BigIntegerExtensions.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

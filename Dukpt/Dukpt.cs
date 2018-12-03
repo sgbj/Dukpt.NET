@@ -24,31 +24,62 @@ namespace DukptNet
 
         #region Private Methods
 
+        /// <summary>
+        /// Create Initial PIN Encryption Key
+        /// </summary>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <returns>Initial PIN Encryption Key</returns>
         private static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
         {
             return Transform("TripleDES", true, bdk, (ksn & KsnMask) >> 16) << 64
                  | Transform("TripleDES", true, bdk ^ KeyMask, (ksn & KsnMask) >> 16);
         }
 
+        /// <summary>
+        /// Create Session Key with PEK Mask
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Session Key</returns>
         private static BigInteger CreateSessionKeyPEK(BigInteger ipek, BigInteger ksn)
         {
             return DeriveKey(ipek, ksn) ^ PekMask;
         }
 
+        /// <summary>
+        /// Create Session Key with DEK Mask
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Session Key</returns>
         private static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn) {
 			BigInteger key = DeriveKey(ipek, ksn) ^ DekMask;
 			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
 				 | Transform("TripleDES", true, key, (key & Ls16Mask));
 		}
 
-        private static BigInteger CreateSessionKey(string bdk, string ksn, bool isPIN)
+        /// <summary>
+        /// Create Session Key
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="usePEKMask">Use PEK mask for PIN data</param>
+        /// <returns>Session Key</returns>
+        private static BigInteger CreateSessionKey(string bdk, string ksn, bool usePEKMask)
         {
             BigInteger ksnBigInt = ksn.HexToBigInteger();
             BigInteger ipek = CreateIpek(ksnBigInt, bdk.HexToBigInteger());
-            BigInteger sessionKey = isPIN ? CreateSessionKeyPEK(ipek, ksnBigInt) : CreateSessionKeyDEK(ipek, ksnBigInt);
+            BigInteger sessionKey = usePEKMask ? CreateSessionKeyPEK(ipek, ksnBigInt) : CreateSessionKeyDEK(ipek, ksnBigInt);
             return sessionKey;
         }
 
+        /// <summary>
+        /// Derive Key from IPEK and KSN
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Key derived from IPEK and KSN</returns>
         private static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
         {
             BigInteger ksnReg = ksn & Ls16Mask & Reg8Mask;
@@ -63,16 +94,36 @@ namespace DukptNet
             return curKey;
         }
 
+        /// <summary>
+        /// Generate Key
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Key generaged from provided key and KSN</returns>
         private static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
         {
             return EncryptRegister(key ^ KeyMask, ksn) << 64 | EncryptRegister(key, ksn);
         }
 
-        private static BigInteger EncryptRegister(BigInteger curKey, BigInteger reg8)
+        /// <summary>
+        /// Encrypt Register
+        /// </summary>
+        /// <param name="key">DES Key</param>
+        /// <param name="reg8">Register which to encrypt</param>
+        /// <returns>Encrypted register value</returns>
+        private static BigInteger EncryptRegister(BigInteger key, BigInteger reg8)
         {
-            return (curKey & Ls16Mask) ^ Transform("DES", true, (curKey & Ms16Mask) >> 64, (curKey & Ls16Mask ^ reg8));
+            return (key & Ls16Mask) ^ Transform("DES", true, (key & Ms16Mask) >> 64, (key & Ls16Mask ^ reg8));
         }
 
+        /// <summary>
+        /// Transform Data
+        /// </summary>
+        /// <param name="name">Encryption algorithm name</param>
+        /// <param name="encrypt">Encrypt data flag</param>
+        /// <param name="key">Encryption key</param>
+        /// <param name="message">Data to encrypt or decrypt</param>
+        /// <returns>Result of transform (encryption or decryption)</returns>
         private static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
         {
             using (SymmetricAlgorithm cipher = SymmetricAlgorithm.Create(name))
@@ -91,6 +142,12 @@ namespace DukptNet
             }
         }
 
+        /// <summary>
+        /// Get nearest whole multiple value of provided decimal value
+        /// </summary>
+        /// <param name="input">Number which to determine nearest whole multiple</param>
+        /// <param name="multiple">Multiple in which to divide input</param>
+        /// <returns>Whole value of input nearest to multiple</returns>
         private static int GetNearestWholeMultiple(decimal input, int multiple)
         {
             decimal output = Math.Round(input / multiple);
@@ -115,7 +172,7 @@ namespace DukptNet
         /// <param name="isPIN">Provided data is PIN data (use PEK mask)</param>
         /// <returns>Encrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Encrypt(string bdk, string ksn, byte[] data, bool isPIN = true)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DukptVariants dataVariant = DukptVariants.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -130,7 +187,7 @@ namespace DukptNet
                 throw new ArgumentNullException(nameof(data));
             }
 
-            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, isPIN), data.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, dataVariant == DukptVariants.PIN), data.ToBigInteger()).GetBytes();
         }
 
         /// <summary>
@@ -142,7 +199,7 @@ namespace DukptNet
         /// <param name="isPIN">Provided data is PIN data (use PEK mask)</param>
         /// <returns>Decrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, bool isPIN = true)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DukptVariants dataVariant = DukptVariants.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -157,7 +214,7 @@ namespace DukptNet
                 throw new ArgumentNullException(nameof(encryptedData));
             }
 
-            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, isPIN), encryptedData.ToBigInteger()).GetBytes();
+            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, dataVariant == DukptVariants.PIN), encryptedData.ToBigInteger()).GetBytes();
         }
 
         /// <summary>
@@ -170,7 +227,7 @@ namespace DukptNet
         /// <returns>Decrypted data</returns>
         public static byte[] DecryptIdTech(string bdk, string ksn, byte[] encryptedData)
         {
-            return Decrypt(bdk, ksn, encryptedData, false);
+            return Decrypt(bdk, ksn, encryptedData, DukptVariants.Data);
         }
 
         #endregion
