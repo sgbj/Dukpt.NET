@@ -7,7 +7,6 @@ namespace DukptNet
 {
     public static class Dukpt
     {
-
         #region Private Mask Constants
 
         private static readonly BigInteger Reg3Mask = "1FFFFF".HexToBigInteger();
@@ -53,34 +52,32 @@ namespace DukptNet
         /// <param name="ipek">Initial PIN Encryption Key</param>
         /// <param name="ksn">Key Serial Number</param>
         /// <returns>Session Key</returns>
-        private static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn) {
-			BigInteger key = DeriveKey(ipek, ksn) ^ DekMask;
-			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
-				 | Transform("TripleDES", true, key, (key & Ls16Mask));
-		}
+        private static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn)
+        {
+            BigInteger key = DeriveKey(ipek, ksn) ^ DekMask;
+            return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64
+                 | Transform("TripleDES", true, key, (key & Ls16Mask));
+        }
 
         /// <summary>
         /// Create Session Key
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
-        /// <param name="dukptVariant">DUKPT variant used to determine session key creation method</param>
+        /// <param name="DUKPTVariant">DUKPT variant used to determine session key creation method</param>
         /// <returns>Session Key</returns>
-        private static BigInteger CreateSessionKey(string bdk, string ksn, DukptVariant dukptVariant)
+        private static BigInteger CreateSessionKey(string bdk, string ksn, DUKPTVariant DUKPTVariant)
         {
             BigInteger ksnBigInt = ksn.HexToBigInteger();
             BigInteger ipek = CreateIpek(ksnBigInt, bdk.HexToBigInteger());
             BigInteger sessionKey;
-            switch (dukptVariant)
+            if (DUKPTVariant == DUKPTVariant.Data)
             {
-                case DukptVariant.Data:
-                    sessionKey = CreateSessionKeyDEK(ipek, ksnBigInt);
-                    break;
-                case DukptVariant.PIN:
-                default:
-                    sessionKey = CreateSessionKeyPEK(ipek, ksnBigInt);
-                    break;
-
+                sessionKey = CreateSessionKeyDEK(ipek, ksnBigInt);
+            }
+            else
+            {
+                sessionKey = CreateSessionKeyPEK(ipek, ksnBigInt);
             }
             return sessionKey;
         }
@@ -99,7 +96,8 @@ namespace DukptNet
             {
                 if ((shiftReg & ksn & Reg3Mask) > 0)
                 {
-                    curKey = GenerateKey(curKey, ksnReg |= shiftReg);
+                    ksnReg = ksnReg | shiftReg;
+                    curKey = GenerateKey(curKey, ksnReg);
                 }
             }
             return curKey;
@@ -175,7 +173,7 @@ namespace DukptNet
         #region Public Methods
 
         /// <summary>
-        /// Encrypt data using TDES DUKPT.
+        /// Encrypt data using TDES DUKPTCore.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
@@ -183,7 +181,7 @@ namespace DukptNet
         /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Encrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DukptVariant variant = DukptVariant.PIN)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DUKPTVariant variant = DUKPTVariant.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -202,15 +200,15 @@ namespace DukptNet
         }
 
         /// <summary>
-        /// Decrypt data using TDES DUKPT.
+        /// Decrypt data using TDES DUKPTCore.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
-        /// <param name="data">Data to decrypt</param>
+        /// <param name="encryptedData">Data to decrypt</param>
         /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Decrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DukptVariant variant = DukptVariant.PIN)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DUKPTVariant variant = DUKPTVariant.PIN)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -238,7 +236,7 @@ namespace DukptNet
         /// <returns>Decrypted data</returns>
         public static byte[] DecryptIdTech(string bdk, string ksn, byte[] encryptedData)
         {
-            return Decrypt(bdk, ksn, encryptedData, DukptVariant.Data);
+            return Decrypt(bdk, ksn, encryptedData, DUKPTVariant.Data);
         }
 
         #endregion

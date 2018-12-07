@@ -1,6 +1,6 @@
 ﻿namespace DukptNet
 {
-    public enum DukptVariant
+    public enum DUKPTVariant
     {
         PIN,
         Data
