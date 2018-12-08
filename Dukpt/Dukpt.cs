@@ -173,7 +173,7 @@ namespace DukptNet
         #region Public Methods
 
         /// <summary>
-        /// Encrypt data using TDES DUKPTCore.
+        /// Encrypt data using TDES DUKPT.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
@@ -181,7 +181,7 @@ namespace DukptNet
         /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Encrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DUKPTVariant variant = DUKPTVariant.PIN)
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DUKPTVariant variant)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -200,7 +200,20 @@ namespace DukptNet
         }
 
         /// <summary>
-        /// Decrypt data using TDES DUKPTCore.
+        /// Encrypt data using TDES DUKPT PIN variant.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to encrypt</param>
+        /// <returns>Encrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data)
+        {
+            return Encrypt(bdk, ksn, data, DUKPTVariant.PIN);
+        }
+
+        /// <summary>
+        /// Decrypt data using TDES DUKPT.
         /// </summary>
         /// <param name="bdk">Base Derivation Key</param>
         /// <param name="ksn">Key Serial Number</param>
@@ -208,7 +221,7 @@ namespace DukptNet
         /// <param name="variant">DUKPT transaction key variant</param>
         /// <returns>Decrypted data</returns>
         /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
-        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DUKPTVariant variant = DUKPTVariant.PIN)
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DUKPTVariant variant)
         {
             if (string.IsNullOrEmpty(bdk))
             {
@@ -224,6 +237,19 @@ namespace DukptNet
             }
 
             return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, variant), encryptedData.ToBigInteger()).GetBytes();
+        }
+
+        /// <summary>
+        /// Decrypt data using TDES DUKPT PIN variant.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="encryptedData">Data to decrypt</param>
+        /// <returns>Decrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData)
+        {
+            return Decrypt(bdk, ksn, encryptedData, DUKPTVariant.PIN);
         }
 
         /// <summary>
