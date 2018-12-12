@@ -7,107 +7,265 @@ namespace DukptNet
 {
     public static class Dukpt
     {
-        private static readonly BigInteger Reg3Mask = BigInt.FromHex("1FFFFF");
-        private static readonly BigInteger ShiftRegMask = BigInt.FromHex("100000");
-        private static readonly BigInteger Reg8Mask = BigInt.FromHex("FFFFFFFFFFE00000");
-        private static readonly BigInteger Ls16Mask = BigInt.FromHex("FFFFFFFFFFFFFFFF");
-        private static readonly BigInteger Ms16Mask = BigInt.FromHex("FFFFFFFFFFFFFFFF0000000000000000");
-        private static readonly BigInteger KeyMask = BigInt.FromHex("C0C0C0C000000000C0C0C0C000000000");
-        private static readonly BigInteger PekMask = BigInt.FromHex("FF00000000000000FF");
-        private static readonly BigInteger KsnMask = BigInt.FromHex("FFFFFFFFFFFFFFE00000");
-		private static readonly BigInteger DekMask = BigInt.FromHex("0000000000FF00000000000000FF0000"); // Used by IDTECH
+        #region Private Mask Constants
 
-        public static BigInteger CreateBdk(BigInteger key1, BigInteger key2)
-        {
-            return key1 ^ key2;
-        }
+        private static readonly BigInteger Reg3Mask = "1FFFFF".HexToBigInteger();
+        private static readonly BigInteger ShiftRegMask = "100000".HexToBigInteger();
+        private static readonly BigInteger Reg8Mask = "FFFFFFFFFFE00000".HexToBigInteger();
+        private static readonly BigInteger Ls16Mask = "FFFFFFFFFFFFFFFF".HexToBigInteger();
+        private static readonly BigInteger Ms16Mask = "FFFFFFFFFFFFFFFF0000000000000000".HexToBigInteger();
+        private static readonly BigInteger KeyMask = "C0C0C0C000000000C0C0C0C000000000".HexToBigInteger();
+        private static readonly BigInteger PekMask = "FF00000000000000FF".HexToBigInteger();
+        private static readonly BigInteger KsnMask = "FFFFFFFFFFFFFFE00000".HexToBigInteger();
+        private static readonly BigInteger DekMask = "0000000000FF00000000000000FF0000".HexToBigInteger();
 
-        public static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Create Initial PIN Encryption Key
+        /// </summary>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <returns>Initial PIN Encryption Key</returns>
+        private static BigInteger CreateIpek(BigInteger ksn, BigInteger bdk)
         {
             return Transform("TripleDES", true, bdk, (ksn & KsnMask) >> 16) << 64
                  | Transform("TripleDES", true, bdk ^ KeyMask, (ksn & KsnMask) >> 16);
         }
 
-        public static BigInteger CreateSessionKey(BigInteger ipek, BigInteger ksn)
+        /// <summary>
+        /// Create Session Key with PEK Mask
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Session Key</returns>
+        private static BigInteger CreateSessionKeyPEK(BigInteger ipek, BigInteger ksn)
         {
             return DeriveKey(ipek, ksn) ^ PekMask;
         }
 
-		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
-		public static BigInteger CreateSessionKeyIdTech(BigInteger ipek, BigInteger ksn) {
-			var key = DeriveKey(ipek, ksn) ^ DekMask;
-			return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64 
-				 | Transform("TripleDES", true, key, (key & Ls16Mask));
-		}
-
-        public static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
+        /// <summary>
+        /// Create Session Key with DEK Mask
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Session Key</returns>
+        private static BigInteger CreateSessionKeyDEK(BigInteger ipek, BigInteger ksn)
         {
-            var ksnReg = ksn & Ls16Mask & Reg8Mask;
-            var curKey = ipek;
-            for (var shiftReg = ShiftRegMask; shiftReg > 0; shiftReg >>= 1)
+            BigInteger key = DeriveKey(ipek, ksn) ^ DekMask;
+            return Transform("TripleDES", true, key, (key & Ms16Mask) >> 64) << 64
+                 | Transform("TripleDES", true, key, (key & Ls16Mask));
+        }
+
+        /// <summary>
+        /// Create Session Key
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="DUKPTVariant">DUKPT variant used to determine session key creation method</param>
+        /// <returns>Session Key</returns>
+        private static BigInteger CreateSessionKey(string bdk, string ksn, DUKPTVariant DUKPTVariant)
+        {
+            BigInteger ksnBigInt = ksn.HexToBigInteger();
+            BigInteger ipek = CreateIpek(ksnBigInt, bdk.HexToBigInteger());
+            BigInteger sessionKey;
+            if (DUKPTVariant == DUKPTVariant.Data)
+            {
+                sessionKey = CreateSessionKeyDEK(ipek, ksnBigInt);
+            }
+            else
+            {
+                sessionKey = CreateSessionKeyPEK(ipek, ksnBigInt);
+            }
+            return sessionKey;
+        }
+
+        /// <summary>
+        /// Derive Key from IPEK and KSN
+        /// </summary>
+        /// <param name="ipek">Initial PIN Encryption Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Key derived from IPEK and KSN</returns>
+        private static BigInteger DeriveKey(BigInteger ipek, BigInteger ksn)
+        {
+            BigInteger ksnReg = ksn & Ls16Mask & Reg8Mask;
+            BigInteger curKey = ipek;
+            for (BigInteger shiftReg = ShiftRegMask; shiftReg > 0; shiftReg >>= 1)
+            {
                 if ((shiftReg & ksn & Reg3Mask) > 0)
-                    curKey = GenerateKey(curKey, ksnReg |= shiftReg);
+                {
+                    ksnReg = ksnReg | shiftReg;
+                    curKey = GenerateKey(curKey, ksnReg);
+                }
+            }
             return curKey;
         }
 
-        public static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
+        /// <summary>
+        /// Generate Key
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <returns>Key generated from provided key and KSN</returns>
+        private static BigInteger GenerateKey(BigInteger key, BigInteger ksn)
         {
             return EncryptRegister(key ^ KeyMask, ksn) << 64 | EncryptRegister(key, ksn);
         }
 
-        public static BigInteger EncryptRegister(BigInteger curKey, BigInteger reg8)
+        /// <summary>
+        /// Encrypt Register
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="reg8">Register which to encrypt</param>
+        /// <returns>Encrypted register value</returns>
+        private static BigInteger EncryptRegister(BigInteger key, BigInteger reg8)
         {
-            return (curKey & Ls16Mask) ^ Transform("DES", true, (curKey & Ms16Mask) >> 64, (curKey & Ls16Mask ^ reg8));
+            return (key & Ls16Mask) ^ Transform("DES", true, (key & Ms16Mask) >> 64, (key & Ls16Mask ^ reg8));
         }
 
-        public static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
+        /// <summary>
+        /// Transform Data
+        /// </summary>
+        /// <param name="name">Encryption algorithm name</param>
+        /// <param name="encrypt">Encrypt data flag</param>
+        /// <param name="key">Encryption key</param>
+        /// <param name="message">Data to encrypt or decrypt</param>
+        /// <returns>Result of transformation (encryption or decryption)</returns>
+        private static BigInteger Transform(string name, bool encrypt, BigInteger key, BigInteger message)
         {
-            using (var cipher = SymmetricAlgorithm.Create(name))
+            using (SymmetricAlgorithm cipher = SymmetricAlgorithm.Create(name))
             {
-                var k = key.GetBytes();
-                // Credit goes to ichoes (https://github.com/ichoes) for fixing this issue (https://github.com/sgbj/Dukpt.NET/issues/5)
-                // gets the next multiple of 8
+                byte[] k = key.GetBytes();
                 cipher.Key = new byte[Math.Max(0, GetNearestWholeMultiple(k.Length, 8) - k.Length)].Concat(key.GetBytes()).ToArray();
                 cipher.IV = new byte[8];
                 cipher.Mode = CipherMode.CBC;
                 cipher.Padding = PaddingMode.Zeros;
-                using (var crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
+                using (ICryptoTransform crypto = encrypt ? cipher.CreateEncryptor() : cipher.CreateDecryptor())
                 {
-                    var data = message.GetBytes();
-                    // Added the GetNearestWholeMultiple here.
+                    byte[] data = message.GetBytes();
                     data = new byte[Math.Max(0, GetNearestWholeMultiple(data.Length, 8) - data.Length)].Concat(message.GetBytes()).ToArray();
-                    return BigInt.FromBytes(crypto.TransformFinalBlock(data, 0, data.Length));
+                    return crypto.TransformFinalBlock(data, 0, data.Length).ToBigInteger();
                 }
             }
         }
 
-        // Gets the next multiple of 8
-        // Works with both scenarios, getting 7 bytes instead of 8 and works when expecting 16 bytes and getting 15.
+        /// <summary>
+        /// Get nearest whole value of provided decimal value which is a multiple of provided integer
+        /// </summary>
+        /// <param name="input">Number which to determine nearest whole multiple</param>
+        /// <param name="multiple">Multiple in which to divide input</param>
+        /// <returns>Whole integer value of input nearest to a multiple of provided decimal</returns>
         private static int GetNearestWholeMultiple(decimal input, int multiple)
         {
-            var output = Math.Round(input / multiple);
-            if (output == 0 && input > 0) output += 1;
+            decimal output = Math.Round(input / multiple);
+            if (output == 0 && input > 0)
+            {
+                output += 1;
+            }
             output *= multiple;
             return (int)output;
         }
 
-        public static byte[] Encrypt(string bdk, string ksn, byte[] track)
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Encrypt data using TDES DUKPT.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to encrypt</param>
+        /// <param name="variant">DUKPT transaction key variant</param>
+        /// <returns>Encrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data, DUKPTVariant variant)
         {
-            return Transform("TripleDES", true, CreateSessionKey(CreateIpek(
-                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
+            if (string.IsNullOrEmpty(bdk))
+            {
+                throw new ArgumentNullException(nameof(bdk));
+            }
+            if (string.IsNullOrEmpty(ksn))
+            {
+                throw new ArgumentNullException(nameof(ksn));
+            }
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            return Transform("TripleDES", true, CreateSessionKey(bdk, ksn, variant), data.ToBigInteger()).GetBytes();
         }
 
-        public static byte[] Decrypt(string bdk, string ksn, byte[] track)
+        /// <summary>
+        /// Encrypt data using TDES DUKPT PIN variant.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to encrypt</param>
+        /// <returns>Encrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
+        public static byte[] Encrypt(string bdk, string ksn, byte[] data)
         {
-            return Transform("TripleDES", false, CreateSessionKey(CreateIpek(
-                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
+            return Encrypt(bdk, ksn, data, DUKPTVariant.PIN);
         }
 
-		// Issue #7 Added in the handling for decrypting IDTech tracks jm97
-		public static byte[] DecryptIdTech(string bdk, string ksn, byte[] track) 
-		{
-			return Transform("TripleDES", false, CreateSessionKeyIdTech(CreateIpek(
-                BigInt.FromHex(ksn), BigInt.FromHex(bdk)), BigInt.FromHex(ksn)), BigInt.FromBytes(track)).GetBytes();
-		}
+        /// <summary>
+        /// Decrypt data using TDES DUKPT.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="encryptedData">Data to decrypt</param>
+        /// <param name="variant">DUKPT transaction key variant</param>
+        /// <returns>Decrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData, DUKPTVariant variant)
+        {
+            if (string.IsNullOrEmpty(bdk))
+            {
+                throw new ArgumentNullException(nameof(bdk));
+            }
+            if (string.IsNullOrEmpty(ksn))
+            {
+                throw new ArgumentNullException(nameof(ksn));
+            }
+            if (encryptedData == null)
+            {
+                throw new ArgumentNullException(nameof(encryptedData));
+            }
+
+            return Transform("TripleDES", false, CreateSessionKey(bdk, ksn, variant), encryptedData.ToBigInteger()).GetBytes();
+        }
+
+        /// <summary>
+        /// Decrypt data using TDES DUKPT PIN variant.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="encryptedData">Data to decrypt</param>
+        /// <returns>Decrypted data</returns>
+        /// <exception cref="ArgumentNullException">Thrown for null or empty parameter values</exception>
+        public static byte[] Decrypt(string bdk, string ksn, byte[] encryptedData)
+        {
+            return Decrypt(bdk, ksn, encryptedData, DUKPTVariant.PIN);
+        }
+
+        /// <summary>
+        /// Decrypt data using TDES DUKPT Data variant.
+        /// Backwards-compatible with previous versions of Dukpt.NET.
+        /// </summary>
+        /// <param name="bdk">Base Derivation Key</param>
+        /// <param name="ksn">Key Serial Number</param>
+        /// <param name="data">Data to decrypt</param>
+        /// <returns>Decrypted data</returns>
+        public static byte[] DecryptIdTech(string bdk, string ksn, byte[] encryptedData)
+        {
+            return Decrypt(bdk, ksn, encryptedData, DUKPTVariant.Data);
+        }
+
+        #endregion
+
     }
 }
