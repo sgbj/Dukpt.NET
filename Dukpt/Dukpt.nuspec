@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/sgbj/Dukpt.NET</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2015</copyright>
+    <copyright>Copyright 2019</copyright>
     <tags>DUKPT Dukpt.NET TDES 3DES x9.24</tags>
     <frameworkAssemblies>
       <frameworkAssembly assemblyName="System.Numerics" targetFramework="net40" />
